@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Tests / typing / lint
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets and local env
+.env
+.env.*
+
+# Local data and artifacts (keep directory placeholders)
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/README.md
+data/processed/*
+!data/processed/.gitkeep
+!data/processed/README.md
+data/sample/*
+!data/sample/.gitkeep
+!data/sample/README.md
+
+# Experiment outputs (commit configs, not unmarked dumps)
+experiments/**/outputs/
+experiments/**/*.log
+reports/*.html
+reports/*.pdf
+
+# Model weights (none expected in this phase)
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.joblib

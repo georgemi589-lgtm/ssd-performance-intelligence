@@ -1,0 +1,17 @@
+# Reproducible FIO job options from data/raw/exp001.json
+# (jobs[0].job options). Results are not stored here.
+
+experiment_id: EXP001
+
+fio:
+  name: exp001-seq-read
+  filename: 'C:\fio-lab\exp001_testfile.bin'
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 1
+  ioengine: windowsaio
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1

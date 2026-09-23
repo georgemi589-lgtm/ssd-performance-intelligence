@@ -1,5 +1,7 @@
 # Reports
 
-Write-up location for methods, figures, and results **after** experiments exist.
+| ID | Report | Experiment note |
+|----|--------|-----------------|
+| EXP001 | [EXP001.md](EXP001.md) | [experiments/EXP001.md](../experiments/EXP001.md) |
 
-This folder contains no findings yet.
+Reports list FIO-recorded values only. They are not device specifications and not maximum-performance claims.

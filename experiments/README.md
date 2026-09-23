@@ -1,5 +1,7 @@
 # Experiments
 
-Add one directory or script per study (e.g. `exp001_baseline_latency/`) with a README that points at the config file.
+| ID | Write-up | Config | Raw artifact | Results |
+|----|----------|--------|--------------|---------|
+| EXP001 | [EXP001.md](EXP001.md) | `configs/exp001.yaml` | `data/raw/exp001.json` | [reports/EXP001.md](../reports/EXP001.md) |
 
-No experiments have been executed. Do not infer results from this folder being present.
+Record only measured values. Do not treat a write-up as a device spec or a performance maximum.

@@ -2,7 +2,7 @@
 
 Evidence-based research prototype for **AI-based SSD performance and workload intelligence**.
 
-This repository is a structured starting point for studying how storage workloads relate to SSD behavior (throughput, latency, and related telemetry). It does **not** yet contain trained models, collected datasets, or measured performance results.
+This repository is a structured starting point for studying how storage workloads relate to SSD behavior (throughput, latency, and related telemetry). It does **not** contain trained models. One documented host-level FIO snapshot exists ([EXP001](reports/EXP001.md)); that run is not a device spec and not a maximum-performance result.
 
 ## Research problem
 
@@ -14,7 +14,7 @@ The long-term research goal is to ask, with measured evidence rather than vendor
 - Can models trained on documented traces or controlled experiments **predict** or **explain** performance under held-out workloads?
 - Where do such models fail (device type, firmware, cache effects, thermal throttling, write amplification)?
 
-No accuracy, speedup, or ranking claims are made in this repository until experiments are run and reported with methods, data provenance, and uncertainty.
+No accuracy, speedup, ranking, or peak-SSD claims are made. EXP001 is reported with methods, the raw FIO artifact, and explicit limits (unknown device; host-level FIO only).
 
 ## Initial research questions
 
@@ -41,7 +41,7 @@ No accuracy, speedup, or ranking claims are made in this repository until experi
 
 ## Limitations
 
-- **No empirical results yet.** Empty `data/` directories are placeholders, not hidden measurements.
+- **Sparse measurements.** EXP001 is a single sequential-read FIO job. `data/` is otherwise empty; do not treat placeholders as hidden results. Device model for EXP001 is unknown.
 - **Device diversity.** SSD behavior depends on NAND type, controller, DRAM/HMB, firmware, interface (SATA/NVMe), and host stack. Early findings will not generalize by default.
 - **Observability.** Host-level I/O stats omit much of FTL, GC, and NAND-level state.
 - **Ethics and safety.** Benchmarks that wear devices or disrupt a user’s machine are excluded unless explicitly designed, isolated, and documented later.

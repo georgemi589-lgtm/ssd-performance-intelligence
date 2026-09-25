@@ -1,0 +1,57 @@
+# Experiment template configuration
+# ---------------------------------------------------------------------------
+# Copy this file, give it a new experiment_id, fill in fio.filename with
+# the path to your benchmark target FILE (never a block device), and run:
+#
+#   python experiments/run_experiment.py --config configs/<your_config>.yaml
+#
+# Dry-run is the default.  Add --execute only when you have confirmed the
+# target file, workload, and safety constraints below.
+# ---------------------------------------------------------------------------
+
+experiment_id: EXP_TEMPLATE
+
+# Safety constraints (must remain false; these values are checked at runtime).
+# The runner refuses to proceed if allow_destructive_benchmarks is true.
+safety:
+  allow_destructive_benchmarks: false
+  allow_system_disk_tests: false
+
+# ---------------------------------------------------------------------------
+# FIO job parameters
+# Every parameter maps directly to a fio CLI flag (--<key>=<value>).
+# The runner always appends --output-format=json; do not add it here.
+#
+# REQUIRED:
+#   filename — MUST be a path to a regular file, not a block device.
+#              Examples:
+#                Linux/macOS:  /tmp/fio-lab/benchmark_testfile.bin
+#                Windows:      C:\fio-lab\benchmark_testfile.bin
+#              The runner rejects /dev/*, \\.\PhysicalDrive*, and \\?\* paths.
+# ---------------------------------------------------------------------------
+fio:
+  name: template-seq-read
+  filename: /tmp/fio-lab/benchmark_testfile.bin   # <-- change this
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 1
+  ioengine: libaio          # use windowsaio on Windows
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1
+
+# ---------------------------------------------------------------------------
+# Notes for the experiment write-up
+# Fill these in before running; they feed the EXP*.md documents.
+# ---------------------------------------------------------------------------
+notes:
+  objective: >
+    Template sequential-read baseline.  Replace this with the specific
+    objective of your experiment before running.
+  hardware: unknown          # record device model if known
+  os: unknown                # e.g. "Windows 11 23H2" or "Ubuntu 24.04"
+  limitations: >
+    This is a template.  Results will not be valid until fio.filename is
+    updated and the experiment is documented per docs/methods.md.

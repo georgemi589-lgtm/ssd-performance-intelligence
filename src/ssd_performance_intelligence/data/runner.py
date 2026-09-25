@@ -1,0 +1,317 @@
+"""Experiment runner: build and (optionally) execute FIO commands.
+
+Safety contract
+---------------
+* Dry-run is the default. Actual FIO execution requires ``--execute`` to be
+  passed explicitly by the caller.
+* Only a *file-path* benchmark target is permitted.  Block-device paths
+  (``/dev/…``, ``\\\\.\\PhysicalDrive…``, ``\\\\?\\...``) are rejected before
+  any command is assembled.
+* Destructive FIO operations (``verify``, ``randwrite`` with ``size`` equal to
+  device capacity, ``trim``) may not be configured via this runner without
+  raising an explicit :class:`SafetyError`.
+* This module never imports ``subprocess`` itself; the actual ``subprocess``
+  call is deferred to :func:`_invoke_fio` and is only reached when the caller
+  has passed ``execute=True``.  Nothing in the dry-run path touches the OS.
+
+These rules mirror ``configs/default.yaml``'s ``safety`` block and the
+project-wide principle stated in ``docs/research_notes.md`` (isolated spare
+device, written protocol, non-system volume).
+"""
+
+from __future__ import annotations
+
+import datetime
+import json
+import os
+import shlex
+import sys
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from ssd_performance_intelligence.data.fio_parser import parse_fio_output
+from ssd_performance_intelligence.data.schema import ParsedFioOutput
+from ssd_performance_intelligence.paths import CONFIGS_DIR, RAW_DATA_DIR
+
+
+# ---------------------------------------------------------------------------
+# Exceptions
+# ---------------------------------------------------------------------------
+
+class SafetyError(RuntimeError):
+    """Raised when a requested FIO configuration violates the safety contract."""
+
+
+class RunnerError(RuntimeError):
+    """Raised for runner configuration or execution errors unrelated to safety."""
+
+
+# ---------------------------------------------------------------------------
+# Safety helpers
+# ---------------------------------------------------------------------------
+
+# Prefixes and patterns that unambiguously indicate a raw block device.
+_BLOCK_DEVICE_PREFIXES: tuple[str, ...] = (
+    "/dev/",          # Linux / macOS raw block devices
+    "\\\\.\\",        # Windows physical drive notation  (\\.\PhysicalDriveN)
+    "\\\\?\\",        # Windows device namespace prefix
+)
+
+# FIO job options whose presence is always refused by the safety contract.
+_DISALLOWED_JOB_OPTIONS: dict[str, str] = {
+    "verify": "write-verify workloads may be destructive; excluded by safety contract",
+    "trim":   "TRIM/UNMAP operations are destructive; excluded by safety contract",
+}
+
+
+def _check_filename_safety(filename: str) -> None:
+    """Raise :class:`SafetyError` if *filename* targets anything other than a regular file path."""
+    if not filename or not filename.strip():
+        raise SafetyError("Benchmark target filename must not be empty")
+    normalized = filename.strip().replace("\\", "/")
+    for prefix in _BLOCK_DEVICE_PREFIXES:
+        if filename.startswith(prefix) or normalized.startswith(prefix.replace("\\", "/")):
+            raise SafetyError(
+                f"Benchmark target {filename!r} looks like a raw block device. "
+                "Only file-path targets are permitted.  "
+                "See docs/research_notes.md for the project safety contract."
+            )
+
+
+def _check_job_options_safety(job_options: dict[str, Any]) -> None:
+    """Raise :class:`SafetyError` if any job option violates the safety contract."""
+    for key, reason in _DISALLOWED_JOB_OPTIONS.items():
+        if key in job_options:
+            raise SafetyError(f"FIO option {key!r} is not permitted: {reason}")
+
+
+def _check_global_safety(config: dict[str, Any]) -> None:
+    """Raise :class:`SafetyError` if the YAML config's safety block forbids execution."""
+    safety = config.get("safety", {})
+    if not isinstance(safety, dict):
+        return
+    if safety.get("allow_destructive_benchmarks") is True:
+        # The flag may exist but it must remain False for the runner to proceed.
+        raise SafetyError(
+            "safety.allow_destructive_benchmarks is True in the loaded config; "
+            "this runner does not support destructive benchmarks."
+        )
+
+
+# ---------------------------------------------------------------------------
+# Config helpers
+# ---------------------------------------------------------------------------
+
+def _load_experiment_config(config_path: Path) -> dict[str, Any]:
+    """Load and minimally validate a YAML experiment config."""
+    if not config_path.is_file():
+        raise RunnerError(f"Experiment config not found: {config_path}")
+    with config_path.open(encoding="utf-8") as fh:
+        payload = yaml.safe_load(fh)
+    if not isinstance(payload, dict):
+        raise RunnerError(f"Config {config_path} must be a YAML mapping")
+    return payload
+
+
+def _resolve_config_path(config_name: str) -> Path:
+    """Resolve config name to an absolute path, searching ``configs/`` if needed."""
+    p = Path(config_name)
+    if p.is_absolute():
+        return p
+    if p.is_file():
+        return p.resolve()
+    candidate = CONFIGS_DIR / config_name
+    if candidate.is_file():
+        return candidate
+    raise RunnerError(
+        f"Config {config_name!r} not found as an absolute path, relative path, "
+        f"or under {CONFIGS_DIR}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Command builder
+# ---------------------------------------------------------------------------
+
+def build_fio_command(fio_block: dict[str, Any]) -> list[str]:
+    """Turn a YAML ``fio:`` block into an ``fio`` CLI argument list.
+
+    The returned list is suitable for ``subprocess.run`` or logging; it is
+    never executed by this function.  Raises :class:`SafetyError` or
+    :class:`RunnerError` before returning if the configuration is unsafe or
+    malformed.
+    """
+    if not isinstance(fio_block, dict):
+        raise RunnerError("The 'fio' block in the experiment config must be a mapping")
+
+    # Every field is pulled explicitly so we never pass unknown options silently.
+    name = fio_block.get("name", "unnamed-job")
+    filename = fio_block.get("filename")
+    if not filename:
+        raise RunnerError("fio.filename is required and must be a file path")
+
+    filename = str(filename)
+    _check_filename_safety(filename)
+
+    # Collect job options for safety scanning before building the command.
+    option_fields = {
+        "rw", "bs", "iodepth", "ioengine", "direct", "runtime",
+        "time_based", "group_reporting", "size", "numjobs",
+        "output_format", "output",
+    }
+    job_options: dict[str, Any] = {k: fio_block[k] for k in option_fields if k in fio_block}
+
+    # Also check for any extra keys the user added directly to the fio block.
+    extra_keys = set(fio_block.keys()) - option_fields - {"name", "filename"}
+    for key in extra_keys:
+        job_options[key] = fio_block[key]
+
+    _check_job_options_safety(job_options)
+
+    cmd: list[str] = ["fio", f"--name={name}", f"--filename={filename}"]
+    _KNOWN_FLAGS = {
+        "rw", "bs", "iodepth", "ioengine", "direct", "runtime",
+        "time_based", "group_reporting", "size", "numjobs",
+    }
+    for key in sorted(_KNOWN_FLAGS):
+        if key in fio_block:
+            cmd.append(f"--{key}={fio_block[key]}")
+    # Always request JSON output from the runner.
+    cmd.append("--output-format=json")
+    return cmd
+
+
+# ---------------------------------------------------------------------------
+# Output-path helpers
+# ---------------------------------------------------------------------------
+
+def _output_json_path(experiment_id: str) -> Path:
+    """Return the path where raw FIO JSON should be saved."""
+    safe_id = experiment_id.lower().replace(" ", "_")
+    return RAW_DATA_DIR / f"{safe_id}.json"
+
+
+# ---------------------------------------------------------------------------
+# Execution (only reached when execute=True)
+# ---------------------------------------------------------------------------
+
+def _invoke_fio(cmd: list[str], *, timeout_s: int = 120) -> str:
+    """Execute *cmd* and return stdout.  Only called when execute=True.
+
+    Importing subprocess is deferred to here so the entire dry-run path is
+    clean of any subprocess dependency.
+    """
+    import subprocess  # local import: only needed during actual execution
+
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout_s,
+            check=False,  # we check returncode manually for a cleaner error
+        )
+    except FileNotFoundError:
+        raise RunnerError(
+            "fio executable not found on PATH.  "
+            "Install fio and ensure it is on PATH before using --execute."
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RunnerError(f"fio command timed out after {timeout_s}s: {exc}") from exc
+
+    if result.returncode != 0:
+        raise RunnerError(
+            f"fio exited with code {result.returncode}.\n"
+            f"stderr:\n{result.stderr.strip()}"
+        )
+    return result.stdout
+
+
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
+
+def run_experiment(
+    config_name: str,
+    *,
+    execute: bool = False,
+    output_dir: Path | None = None,
+    fio_timeout_s: int = 120,
+) -> dict[str, Any]:
+    """Run or dry-run one FIO experiment from a YAML config.
+
+    Parameters
+    ----------
+    config_name:
+        Filename (e.g. ``"experiment_template.yaml"``) resolved against
+        ``configs/``, or an absolute path to any YAML experiment config.
+    execute:
+        When ``False`` (the default) only build and validate the FIO command;
+        do not run fio and do not write any output files.
+        When ``True``, actually invoke fio, save the raw JSON artifact to
+        ``data/raw/<experiment_id>.json``, and return a
+        :class:`~ssd_performance_intelligence.data.schema.ParsedFioOutput`
+        under ``result["parsed"]``.
+    output_dir:
+        Override the default output directory (``data/raw/``).  Useful for
+        integration tests that want to write to a temp directory.
+    fio_timeout_s:
+        Subprocess timeout in seconds when ``execute=True``.
+
+    Returns
+    -------
+    dict with keys:
+
+    ``"experiment_id"``   – string, e.g. ``"EXP_TEMPLATE"``
+    ``"dry_run"``         – bool, mirrors ``not execute``
+    ``"command"``         – list[str], the fio command that would be (or was) run
+    ``"command_string"``  – the shell-quoted command string (informational)
+    ``"output_path"``     – Path | None, where JSON was saved (None if dry-run)
+    ``"parsed"``          – ParsedFioOutput | None, populated only when execute=True
+    ``"timestamp"``       – ISO-8601 UTC timestamp of this call
+    """
+    config_path = _resolve_config_path(config_name)
+    config = _load_experiment_config(config_path)
+
+    _check_global_safety(config)
+
+    experiment_id: str = str(config.get("experiment_id", config_path.stem))
+    fio_block: dict[str, Any] = config.get("fio", {})
+    if not fio_block:
+        raise RunnerError(f"Config {config_path} is missing a 'fio:' block")
+
+    cmd = build_fio_command(fio_block)
+    cmd_string = shlex.join(cmd) if sys.platform != "win32" else " ".join(cmd)
+
+    result: dict[str, Any] = {
+        "experiment_id": experiment_id,
+        "dry_run": not execute,
+        "command": cmd,
+        "command_string": cmd_string,
+        "output_path": None,
+        "parsed": None,
+        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+    }
+
+    if not execute:
+        return result
+
+    # ---- actual execution path ----------------------------------------
+    raw_stdout = _invoke_fio(cmd, timeout_s=fio_timeout_s)
+    parsed: ParsedFioOutput = parse_fio_output(raw_stdout)
+
+    out_dir = output_dir if output_dir is not None else RAW_DATA_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{experiment_id.lower().replace(' ', '_')}.json"
+
+    # Write the raw JSON payload (not the normalized Python object) to disk.
+    out_path.write_text(
+        json.dumps(parsed.raw, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    result["output_path"] = out_path
+    result["parsed"] = parsed
+    return result

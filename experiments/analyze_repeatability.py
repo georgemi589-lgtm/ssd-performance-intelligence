@@ -61,7 +61,7 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "|---|---|---|---|",
     ]
     for row in rows:
-        lines.append(f"| {row["experiment_id"]} | {row["condition"]} | {row["source_type"]} | {row["raw_artifact_available"]} |")
+        lines.append(f"| {row['experiment_id']} | {row['condition']} | {row['source_type']} | {row['raw_artifact_available']} |")
     for metric, label in METRICS.items():
         lines += ["", f"## {label}", "", "| Condition | n | Mean | Median | Sample SD | CV | Min | Max |", "|---|---:|---:|---:|---:|---:|---:|---:|"]
         grouped = grouped_values(rows, metric)
@@ -71,7 +71,7 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
                 if x is None:
                     return "—"
                 return f"{x:.3f}" if isinstance(x, float) else str(x)
-            lines.append(f"| {condition} | {s["n"]} | {fmt(s["mean"])} | {fmt(s["median"])} | {fmt(s["stdev"])} | {fmt(s["cv_pct"])}% | {fmt(s["min"])} | {fmt(s["max"])} |")
+            lines.append(f"| {condition} | {s['n']} | {fmt(s['mean'])} | {fmt(s['median'])} | {fmt(s['stdev'])} | {fmt(s['cv_pct'])}% | {fmt(s['min'])} | {fmt(s['max'])} |")
     lines += [
         "",
         "## Current interpretation",

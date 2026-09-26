@@ -24,6 +24,7 @@ from __future__ import annotations
 import datetime
 import json
 import os
+import re
 import shlex
 import sys
 from pathlib import Path
@@ -85,6 +86,44 @@ def _check_job_options_safety(job_options: dict[str, Any]) -> None:
     for key, reason in _DISALLOWED_JOB_OPTIONS.items():
         if key in job_options:
             raise SafetyError(f"FIO option {key!r} is not permitted: {reason}")
+
+
+def _validate_protocol_v2(config: dict[str, Any]) -> None:
+    """Validate the minimum metadata required for controlled Protocol v2 runs."""
+    experiment_id = str(config.get("experiment_id", ""))
+    if not re.fullmatch(r"EXP\d{3,}", experiment_id):
+        raise RunnerError(
+            "Protocol v2 requires experiment_id in the form EXP### or higher "
+            f"(got {experiment_id!r})."
+        )
+    protocol = config.get("protocol", {})
+    if not isinstance(protocol, dict):
+        raise RunnerError("The 'protocol' block must be a mapping.")
+    if protocol.get("version") != "2":
+        raise RunnerError(
+            "New benchmark runs require protocol.version: '2'. "
+            "Do not execute an unversioned or legacy config."
+        )
+    for key in ("replicate_index", "run_order"):
+        value = protocol.get(key)
+        if not isinstance(value, int) or value < 1:
+            raise RunnerError(
+                f"Protocol v2 requires protocol.{key} to be a positive integer."
+            )
+    fio = config.get("fio", {})
+    if not isinstance(fio, dict):
+        raise RunnerError("The 'fio' block must be a mapping.")
+    name = str(fio.get("name", ""))
+    if not name.lower().startswith(experiment_id.lower() + "-"):
+        raise RunnerError(
+            "Experiment metadata mismatch: fio.name must start with the "
+            f"experiment_id ({experiment_id.lower()}-)."
+        )
+    if "thread" not in fio:
+        raise RunnerError(
+            "Protocol v2 requires an explicit fio.thread setting. "
+            "Set it deliberately for the target platform."
+        )
 
 
 def _check_global_safety(config: dict[str, Any]) -> None:
@@ -158,7 +197,7 @@ def build_fio_command(fio_block: dict[str, Any]) -> list[str]:
     # Collect job options for safety scanning before building the command.
     option_fields = {
         "rw", "bs", "iodepth", "ioengine", "direct", "runtime",
-        "time_based", "group_reporting", "size", "numjobs",
+        "time_based", "group_reporting", "size", "numjobs", "thread",
         "output_format", "output",
     }
     job_options: dict[str, Any] = {k: fio_block[k] for k in option_fields if k in fio_block}
@@ -173,7 +212,7 @@ def build_fio_command(fio_block: dict[str, Any]) -> list[str]:
     cmd: list[str] = ["fio", f"--name={name}", f"--filename={filename}"]
     _KNOWN_FLAGS = {
         "rw", "bs", "iodepth", "ioengine", "direct", "runtime",
-        "time_based", "group_reporting", "size", "numjobs",
+        "time_based", "group_reporting", "size", "numjobs", "thread",
     }
     for key in sorted(_KNOWN_FLAGS):
         if key in fio_block:
@@ -280,6 +319,8 @@ def run_experiment(
     config = _load_experiment_config(config_path)
 
     _check_global_safety(config)
+    if execute:
+        _validate_protocol_v2(config)
 
     experiment_id: str = str(config.get("experiment_id", config_path.stem))
     fio_block: dict[str, Any] = config.get("fio", {})
@@ -295,6 +336,7 @@ def run_experiment(
         "command": cmd,
         "command_string": cmd_string,
         "output_path": None,
+        "metadata_path": None,
         "parsed": None,
         "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
     }
@@ -323,6 +365,29 @@ def run_experiment(
         encoding="utf-8",
     )
 
+    # Keep protocol metadata beside the raw artifact without modifying FIO JSON.
+    protocol = config.get("protocol", {})
+    metadata = {
+        "experiment_id": experiment_id,
+        "protocol": protocol,
+        "config_path": str(config_path),
+        "timestamp_utc": result["timestamp"],
+        "fio_command": cmd,
+        "notes": config.get("notes", {}),
+    }
+    metadata_path = out_path.with_suffix(".metadata.json")
+    if metadata_path.exists() and not overwrite:
+        out_path.unlink()
+        raise RunnerError(
+            f"Protocol metadata already exists: {metadata_path}. "
+            "Use a new experiment_id for a new run."
+        )
+    metadata_path.write_text(
+        json.dumps(metadata, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
     result["output_path"] = out_path
+    result["metadata_path"] = metadata_path
     result["parsed"] = parsed
     return result

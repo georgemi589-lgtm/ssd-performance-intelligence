@@ -146,6 +146,8 @@ On success the runner:
 4. Saves the **raw JSON payload** to `data/raw/exp002.json`.
 5. Returns the `ParsedFioOutput` object to the calling process.
 
+The runner also refuses to overwrite an existing raw artifact by default. Use a new `experiment_id` for each run. The `--overwrite` option is available only for an intentional replacement.
+
 Nothing is written to disk during dry-run.
 
 ---

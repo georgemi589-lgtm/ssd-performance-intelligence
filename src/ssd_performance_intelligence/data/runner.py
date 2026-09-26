@@ -239,6 +239,7 @@ def run_experiment(
     execute: bool = False,
     output_dir: Path | None = None,
     fio_timeout_s: int = 120,
+    overwrite: bool = False,
 ) -> dict[str, Any]:
     """Run or dry-run one FIO experiment from a YAML config.
 
@@ -308,6 +309,13 @@ def run_experiment(
     out_dir = output_dir if output_dir is not None else RAW_DATA_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{experiment_id.lower().replace(' ', '_')}.json"
+
+    if out_path.exists() and not overwrite:
+        raise RunnerError(
+            f"Raw output already exists: {out_path}. "
+            "Use a new experiment_id for a new run, or pass --overwrite only "
+            "when intentionally replacing that artifact."
+        )
 
     # Write the raw JSON payload (not the normalized Python object) to disk.
     out_path.write_text(

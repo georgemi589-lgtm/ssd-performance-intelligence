@@ -83,6 +83,15 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="SECONDS",
         help="Subprocess timeout when --execute is set (default: 120 s).",
     )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        default=False,
+        help=(
+            "Allow replacing an existing raw JSON artifact. Use only when "
+            "intentionally replacing a run."
+        ),
+    )
     return parser
 
 
@@ -104,6 +113,7 @@ def main(argv: list[str] | None = None) -> int:
             execute=args.execute,
             output_dir=output_dir,
             fio_timeout_s=args.timeout,
+            overwrite=args.overwrite,
         )
     except SafetyError as exc:
         print(f"\n[SAFETY ERROR] {exc}", file=sys.stderr)

@@ -1,0 +1,28 @@
+﻿experiment_id: EXP002
+
+safety:
+  allow_destructive_benchmarks: false
+  allow_system_disk_tests: false
+
+fio:
+  name: exp002-seq-read-qd2
+  filename: 'C:\fio-lab\exp001_testfile.bin'
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 2
+  ioengine: windowsaio
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1
+
+notes:
+  objective: >
+    Measure sequential-read SSD behavior at queue depth 2 while keeping
+    the workload conditions otherwise consistent with Experiment 001.
+  hardware: 'BIWIN AP423 CE480TC8800-256G'
+  os: 'Windows'
+  limitations: >
+    This is a controlled file-based read experiment on the current system.
+    It is not a characterization of peak SSD performance or NAND-level behavior.

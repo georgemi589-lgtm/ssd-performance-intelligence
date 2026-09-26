@@ -1,0 +1,21 @@
+experiment_id: EXP003
+safety:
+  allow_destructive_benchmarks: false
+  allow_system_disk_tests: false
+
+fio:
+  name: exp003-seq-read-qd1
+  filename: 'C:\fio-lab\exp001_testfile.bin'
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 1
+  ioengine: windowsaio
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1
+
+notes:
+  objective: repeat sequential-read at QD1
+  comparison: EXP001 QD1 baseline

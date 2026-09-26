@@ -9,7 +9,7 @@
 # target file, workload, and safety constraints below.
 # ---------------------------------------------------------------------------
 
-experiment_id: EXP005
+experiment_id: EXP_TEMPLATE
 
 # Protocol v2 metadata for controlled benchmark runs.
 protocol:

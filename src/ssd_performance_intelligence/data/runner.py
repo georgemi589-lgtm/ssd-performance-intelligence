@@ -259,6 +259,9 @@ def run_experiment(
         integration tests that want to write to a temp directory.
     fio_timeout_s:
         Subprocess timeout in seconds when ``execute=True``.
+    overwrite:
+        When ``False`` (the default), refuse to overwrite an existing raw JSON
+        artifact. Set ``True`` only when intentionally replacing a run artifact.
 
     Returns
     -------

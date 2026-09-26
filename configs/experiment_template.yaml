@@ -9,7 +9,13 @@
 # target file, workload, and safety constraints below.
 # ---------------------------------------------------------------------------
 
-experiment_id: EXP_TEMPLATE
+experiment_id: EXP005
+
+# Protocol v2 metadata for controlled benchmark runs.
+protocol:
+  version: "2"
+  replicate_index: 1
+  run_order: 1
 
 # Safety constraints (must remain false; these values are checked at runtime).
 # The runner refuses to proceed if allow_destructive_benchmarks is true.
@@ -41,6 +47,7 @@ fio:
   runtime: 10
   time_based: 1
   group_reporting: 1
+  thread: 1
 
 # ---------------------------------------------------------------------------
 # Notes for the experiment write-up
@@ -48,10 +55,10 @@ fio:
 # ---------------------------------------------------------------------------
 notes:
   objective: >
-    Template sequential-read baseline.  Replace this with the specific
-    objective of your experiment before running.
-  hardware: unknown          # record device model if known
-  os: unknown                # e.g. "Windows 11 23H2" or "Ubuntu 24.04"
+    Protocol v2 sequential-read repeatability baseline.
+  comparison: QD1/QD2 repeatability characterization before QD4/QD8.
+  hardware: record before execution          # record device model if known
+  os: record before execution                # e.g. "Windows 11 23H2" or "Ubuntu 24.04"
   limitations: >
     This is a template.  Results will not be valid until fio.filename is
     updated and the experiment is documented per docs/methods.md.

@@ -2,7 +2,7 @@
 
 Evidence-based research prototype for **AI-based SSD performance and workload intelligence**.
 
-This repository is a structured starting point for studying how storage workloads relate to SSD behavior (throughput, latency, and related telemetry). It does **not** contain trained models. One documented host-level FIO snapshot exists ([EXP001](reports/EXP001.md)); that run is not a device spec and not a maximum-performance result.
+This repository is a structured starting point for studying how storage workloads relate to SSD behavior (throughput, latency, and related telemetry). It does **not** contain trained models. The current evidence base includes the initial EXP001/EXP002 observations plus QD1/QD2 repeat measurements and a repeatability analysis ([report](reports/QD1_QD2_repeatability.md)). These measurements are host-level observations, not device specifications or maximum-performance results.
 
 ## Research problem
 

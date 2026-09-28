@@ -2,7 +2,7 @@
 
 This script works on a small CSV of documented observations rather than pretending
 overwritten raw FIO artifacts still exist. It computes descriptive statistics only;
-with two observations per condition it does not perform inference.
+it does not perform population-level inference or causal testing.
 """
 
 from __future__ import annotations
@@ -19,10 +19,12 @@ METRICS = {
     "mean_total_latency_us": "Mean total latency (µs)",
 }
 
+
 def _float_or_none(value: str | None) -> float | None:
     if value is None or value == "":
         return None
     return float(value)
+
 
 def load_rows(path: Path) -> list[dict[str, str]]:
     with path.open(encoding="utf-8-sig", newline="") as fh:
@@ -30,6 +32,7 @@ def load_rows(path: Path) -> list[dict[str, str]]:
     if not rows:
         raise ValueError(f"No observations found in {path}")
     return rows
+
 
 def grouped_values(rows: list[dict[str, str]], metric: str) -> dict[str, list[float]]:
     grouped: dict[str, list[float]] = {}
@@ -40,13 +43,31 @@ def grouped_values(rows: list[dict[str, str]], metric: str) -> dict[str, list[fl
         grouped.setdefault(row["condition"], []).append(value)
     return grouped
 
+
 def stats(values: list[float]) -> dict[str, float | int | None]:
     if not values:
-        return {"n": 0, "mean": None, "median": None, "stdev": None, "cv_pct": None, "min": None, "max": None}
+        return {
+            "n": 0,
+            "mean": None,
+            "median": None,
+            "stdev": None,
+            "cv_pct": None,
+            "min": None,
+            "max": None,
+        }
     avg = mean(values)
     sd = stdev(values) if len(values) >= 2 else None
     cv = (sd / avg * 100.0) if sd is not None and avg != 0 else None
-    return {"n": len(values), "mean": avg, "median": median(values), "stdev": sd, "cv_pct": cv, "min": min(values), "max": max(values)}
+    return {
+        "n": len(values),
+        "mean": avg,
+        "median": median(values),
+        "stdev": sd,
+        "cv_pct": cv,
+        "min": min(values),
+        "max": max(values),
+    }
+
 
 def render_markdown(rows: list[dict[str, str]]) -> str:
     conditions = sorted({row["condition"] for row in rows})
@@ -61,31 +82,52 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "|---|---|---|---|",
     ]
     for row in rows:
-        lines.append(f"| {row['experiment_id']} | {row['condition']} | {row['source_type']} | {row['raw_artifact_available']} |")
+        lines.append(
+            f"| {row['experiment_id']} | {row['condition']} | "
+            f"{row['source_type']} | {row['raw_artifact_available']} |"
+        )
+
     for metric, label in METRICS.items():
-        lines += ["", f"## {label}", "", "| Condition | n | Mean | Median | Sample SD | CV | Min | Max |", "|---|---:|---:|---:|---:|---:|---:|---:|"]
+        lines += [
+            "",
+            f"## {label}",
+            "",
+            "| Condition | n | Mean | Median | Sample SD | CV | Min | Max |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|",
+        ]
         grouped = grouped_values(rows, metric)
         for condition in conditions:
             s = stats(grouped.get(condition, []))
+
             def fmt(x: object) -> str:
                 if x is None:
                     return "—"
                 return f"{x:.3f}" if isinstance(x, float) else str(x)
-            lines.append(f"| {condition} | {s['n']} | {fmt(s['mean'])} | {fmt(s['median'])} | {fmt(s['stdev'])} | {fmt(s['cv_pct'])}% | {fmt(s['min'])} | {fmt(s['max'])} |")
+
+            lines.append(
+                f"| {condition} | {s['n']} | {fmt(s['mean'])} | "
+                f"{fmt(s['median'])} | {fmt(s['stdev'])} | "
+                f"{fmt(s['cv_pct'])}% | {fmt(s['min'])} | {fmt(s['max'])} |"
+            )
+
     lines += [
         "",
         "## Current interpretation",
         "",
-        "- The two QD1 observations differ substantially, while the two QD2 observations are much closer.",
-        "- Run-to-run variability is large enough to confound a one-run QD1-versus-QD2 comparison on this host.",
-        "- The current data are not sufficient to attribute observed differences to queue depth alone.",
-        "- Missing latency percentiles for EXP003/EXP004 are left blank; no values are imputed.",
+        "- These observations are descriptive measurements from this host under the documented protocol.",
+        "- The current QD1 and QD2 groups show different amounts of run-to-run variability, so raw differences should not be attributed to queue depth alone.",
+        "- No population-level inference, causal claim, or production-readiness conclusion is drawn.",
+        "",
+        "## Missing values",
+        "",
+        "- Missing latency percentiles remain blank when they are not available in the retained source record; no values are imputed.",
         "",
         "## Next decision",
         "",
-        "Tighten the baseline protocol and collect multiple repeats per condition before expanding to QD4/QD8.",
+        "Complete the five-repeat QD1/QD2 baseline under Protocol v2 before introducing QD4/QD8 or building predictive models.",
     ]
     return "\n".join(lines) + "\n"
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Analyze documented SSD benchmark observations.")
@@ -101,6 +143,7 @@ def main() -> int:
     else:
         print(report)
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -9,34 +9,35 @@ This report records the controlled sequential-read repeatability baseline under 
 | EXP001 | 1 | 4823.318 | 632201893 | 205.254 |
 | EXP003 | 1 | 2368.100 | 310386778 | 417.000 |
 | EXP005 | 1 | 3564.400 | 467198745 | 278.400 |
+| EXP007 | 1 | 1834.100 | 240401329 | 539.300 |
 | EXP002 | 2 | 4332.267 | 567838870 | 440.430 |
 | EXP004 | 2 | 4484.700 | 587812245 | 429.900 |
 | EXP006 | 2 | 4450.000 | 583264502 | 438.000 |
 
-EXP001 and EXP002 are preserved as documented observations because their original raw artifacts were overwritten by subsequent repeat runs. EXP003, EXP004, EXP005, and EXP006 have retained local raw JSON artifacts. Protocol v2 runs also have metadata sidecars.
+EXP001 and EXP002 are preserved as documented observations because their original raw artifacts were overwritten by subsequent repeat runs. EXP003, EXP004, EXP005, EXP006, and EXP007 have retained local raw JSON artifacts. Protocol v2 runs also have metadata sidecars.
 
 ## Descriptive variability
 
 | Condition | Metric | n | Mean | Sample SD | CV |
 |---|---|---:|---:|---:|---:|
-| QD1 | IOPS | 3 | 3585.273 | 1227.742 | 34.244% |
+| QD1 | IOPS | 4 | 3147.479 | 1330.996 | 42.288% |
 | QD2 | IOPS | 3 | 4422.322 | 79.897 | 1.807% |
-| QD1 | Bandwidth | 3 | 469929138.7 B/s | 160924930.8 B/s | 34.245% |
+| QD1 | Bandwidth | 4 | 412547168.8 B/s | 174197022.7 B/s | 42.287% |
 | QD2 | Bandwidth | 3 | 579638539.0 B/s | 10468745.5 B/s | 1.806% |
-| QD1 | Mean total latency | 3 | 300.218 µs | 107.546 µs | 35.823% |
+| QD1 | Mean total latency | 4 | 359.988 µs | 148.327 µs | 41.203% |
 | QD2 | Mean total latency | 3 | 436.110 µs | 5.514 µs | 1.264% |
 
 These are sample descriptive statistics. The sample sizes remain small, so they should not be treated as population estimates.
 
 ## Interpretation
 
-The current QD1 observations exhibit substantially more run-to-run variability than the current QD2 observations on this host. This is a measurement-system observation, not evidence that queue depth itself causes the observed performance difference.
+With four observed QD1 runs, the QD1 group continues to show substantial run-to-run variability. The current three QD2 runs remain much tighter. The QD1 range in IOPS is 1834.1 to 4823.3, while the QD2 range is 4332.3 to 4484.7.
 
-The controlled Protocol v2 baseline is therefore still focused on characterizing repeatability before introducing higher queue depths or predictive modeling.
+This is a measurement-system observation, not evidence that queue depth itself causes the observed performance difference. The baseline remains focused on characterizing repeatability before introducing higher queue depths or predictive modeling.
 
 ## Missing values
 
-Complete latency percentile data are not available in the retained console summaries for EXP003 and EXP004. Those fields remain blank rather than reconstructed or imputed. EXP005 and EXP006 were recorded through the Protocol v2 runner; this checkpoint preserves the headline latency metric reported by the runner.
+Complete latency percentile data are not available in the retained console summaries for EXP003 and EXP004. Those fields remain blank rather than reconstructed or imputed. EXP005 through EXP007 were recorded through the Protocol v2 runner; this checkpoint preserves the headline latency metric reported by the runner.
 
 ## Provenance note
 

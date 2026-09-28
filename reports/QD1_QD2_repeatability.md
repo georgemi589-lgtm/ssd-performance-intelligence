@@ -1,6 +1,6 @@
 # QD1/QD2 repeatability analysis
 
-This report records the first repeatability check for the SSD Performance Intelligence prototype.
+This report records the controlled sequential-read repeatability baseline under Benchmark Protocol v2.
 
 ## Dataset
 
@@ -8,36 +8,40 @@ This report records the first repeatability check for the SSD Performance Intell
 |---|---:|---:|---:|---:|
 | EXP001 | 1 | 4823.318 | 632201893 | 205.254 |
 | EXP003 | 1 | 2368.100 | 310386778 | 417.000 |
+| EXP005 | 1 | 3564.400 | 467198745 | 278.400 |
 | EXP002 | 2 | 4332.267 | 567838870 | 440.430 |
 | EXP004 | 2 | 4484.700 | 587812245 | 429.900 |
+| EXP006 | 2 | 4450.000 | 583264502 | 438.000 |
 
-EXP001 and EXP002 are preserved as documented observations because their original raw artifacts were overwritten by subsequent repeat runs. EXP003 and EXP004 remain available as local raw JSON artifacts.
+EXP001 and EXP002 are preserved as documented observations because their original raw artifacts were overwritten by subsequent repeat runs. EXP003, EXP004, EXP005, and EXP006 have retained local raw JSON artifacts. Protocol v2 runs also have metadata sidecars.
 
 ## Descriptive variability
 
-| Condition | Metric | Mean | Sample SD | CV |
-|---|---|---:|---:|---:|
-| QD1 | IOPS | 3595.709 | 1736.101 | 48.283% |
-| QD2 | IOPS | 4408.483 | 107.787 | 2.445% |
-| QD1 | Bandwidth | 471294335.5 B/s | 227557650.1 B/s | 48.284% |
-| QD2 | Bandwidth | 577825557.5 B/s | 14123308.9 B/s | 2.444% |
-| QD1 | Mean total latency | 311.127 µs | 149.727 µs | 48.124% |
-| QD2 | Mean total latency | 435.165 µs | 7.446 µs | 1.711% |
+| Condition | Metric | n | Mean | Sample SD | CV |
+|---|---|---:|---:|---:|---:|
+| QD1 | IOPS | 3 | 3585.273 | 1227.742 | 34.244% |
+| QD2 | IOPS | 3 | 4422.322 | 79.897 | 1.807% |
+| QD1 | Bandwidth | 3 | 469929138.7 B/s | 160924930.8 B/s | 34.245% |
+| QD2 | Bandwidth | 3 | 579638539.0 B/s | 10468745.5 B/s | 1.806% |
+| QD1 | Mean total latency | 3 | 300.218 µs | 107.546 µs | 35.823% |
+| QD2 | Mean total latency | 3 | 436.110 µs | 5.514 µs | 1.264% |
 
-These are sample standard deviations from only two observations per condition.
+These are sample descriptive statistics. The sample sizes remain small, so they should not be treated as population estimates.
 
 ## Interpretation
 
-The two QD1 runs show much larger run-to-run variation than the two QD2 runs. Therefore, the earlier one-run observation cannot be interpreted as evidence that queue depth 2 inherently reduces or increases SSD performance.
+The current QD1 observations exhibit substantially more run-to-run variability than the current QD2 observations on this host. This is a measurement-system observation, not evidence that queue depth itself causes the observed performance difference.
 
-The useful finding at this stage is methodological: measurement variability itself must be characterized before attributing a performance difference to workload parameters.
-
-No population-level conclusion is drawn from these four observations.
+The controlled Protocol v2 baseline is therefore still focused on characterizing repeatability before introducing higher queue depths or predictive modeling.
 
 ## Missing values
 
-Complete latency percentile data are not available in the retained console summaries for EXP003 and EXP004. Those fields are left blank rather than reconstructed or imputed.
+Complete latency percentile data are not available in the retained console summaries for EXP003 and EXP004. Those fields remain blank rather than reconstructed or imputed. EXP005 and EXP006 were recorded through the Protocol v2 runner; this checkpoint preserves the headline latency metric reported by the runner.
 
-## Next protocol refinement
+## Provenance note
 
-Before expanding to QD4/QD8, tighten the baseline measurement protocol: retain each raw artifact under a unique experiment ID, explicitly use the Windows thread option to remove the observed FIO mutex warning, keep the read-only workload unchanged, and collect multiple repeats per condition.
+EXP001 and EXP002 raw JSON artifacts were overwritten before the current artifact-protection workflow existed. Their reported values are retained only as contemporaneously documented observations and are not reconstructed into synthetic raw FIO JSON.
+
+## Next protocol step
+
+Continue the interleaved five-repeat QD1/QD2 baseline. Do not expand to QD4/QD8 or build performance models until the baseline repeatability dataset is complete and reviewed.

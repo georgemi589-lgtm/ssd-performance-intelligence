@@ -1,0 +1,38 @@
+experiment_id: EXP006
+
+protocol:
+  version: "2"
+  replicate_index: 1
+  run_order: 2
+
+safety:
+  allow_destructive_benchmarks: false
+  allow_system_disk_tests: false
+
+fio:
+  name: exp006-seq-read-qd2
+  filename: 'C:\fio-lab\exp001_testfile.bin'
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 2
+  ioengine: windowsaio
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1
+  thread: 1
+
+notes:
+  objective: >
+    Characterize QD2 run-to-run repeatability under Benchmark Protocol v2.
+  comparison: >
+    First QD2 replicate interleaved after EXP005 QD1 before expanding to
+    QD4/QD8.
+  condition: QD2
+  replicate_index: 1
+  run_order: 2
+  target_file: 'C:\fio-lab\exp001_testfile.bin'
+  limitations: >
+    Descriptive repeatability experiment only. No causal queue-depth claim
+    will be made from this run alone.

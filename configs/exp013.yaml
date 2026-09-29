@@ -1,0 +1,39 @@
+experiment_id: EXP013
+
+protocol:
+  version: "2"
+  replicate_index: 5
+  run_order: 9
+
+safety:
+  allow_destructive_benchmarks: false
+  allow_system_disk_tests: false
+
+fio:
+  name: exp013-seq-read-qd1
+  filename: 'C:\fio-lab\exp001_testfile.bin'
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 1
+  ioengine: windowsaio
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1
+  thread: 1
+
+notes:
+  objective: >
+    Complete the fifth QD1 repeatability observation under Benchmark Protocol v2.
+  comparison: >
+    Fifth controlled QD1 replicate in the interleaved baseline. After this
+    run, the planned five-observation controlled dataset for QD1 and QD2
+    will be complete.
+  condition: QD1
+  replicate_index: 5
+  run_order: 9
+  target_file: 'C:\fio-lab\exp001_testfile.bin'
+  limitations: >
+    Descriptive repeatability experiment only. No causal queue-depth claim
+    will be made from this run alone.

@@ -1,52 +1,60 @@
 # QD1/QD2 repeatability analysis
 
-This report records the controlled sequential-read repeatability baseline under Benchmark Protocol v2.
+This report records the sequential-read repeatability work under Benchmark Protocol v2 and keeps legacy observations explicitly separated from the controlled protocol subset.
 
 ## Dataset
 
-| Experiment | Requested QD | IOPS | Bandwidth (B/s) | Mean total latency (µs) |
+| Experiment | Requested QD | IOPS | Bandwidth (B/s) | Mean total latency (µs) | Protocol |
+|---|---:|---:|---:|---:|---|
+| EXP001 | 1 | 4823.318 | 632201893 | 205.254 | legacy |
+| EXP003 | 1 | 2368.100 | 310386778 | 417.000 | legacy |
+| EXP005 | 1 | 3564.400 | 467198745 | 278.400 | v2 |
+| EXP007 | 1 | 1834.100 | 240401329 | 539.300 | v2 |
+| EXP009 | 1 | 1783.800 | 233809067 | 554.600 | v2 |
+| EXP002 | 2 | 4332.267 | 567838870 | 440.430 | legacy |
+| EXP004 | 2 | 4484.700 | 587812245 | 429.900 | legacy |
+| EXP006 | 2 | 4450.000 | 583264502 | 438.000 | v2 |
+| EXP008 | 2 | 4430.800 | 580748171 | 442.300 | v2 |
+| EXP010 | 2 | 4117.300 | 539661208 | 472.700 | v2 |
+
+EXP001 and EXP002 are preserved only as documented observations because their original raw artifacts were overwritten before the artifact-protection workflow existed. EXP003 and EXP004 are retained local raw artifacts from the legacy repeat stage. EXP005 through EXP010 are Protocol v2 runs with raw JSON and metadata sidecars.
+
+## Five-observation documented baseline
+
+Across all documented observations, both QD1 and QD2 currently have n=5.
+
+| Condition | Metric | n | Mean | Median | Sample SD | CV | Min | Max |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| QD1 | IOPS | 5 | 2874.744 | 2368.100 | 1304.066 | 45.363% | 1783.800 | 4823.318 |
+| QD2 | IOPS | 5 | 4363.013 | 4430.800 | 148.568 | 3.405% | 4117.300 | 4484.700 |
+| QD1 | Bandwidth (B/s) | 5 | 376799562.4 | 310386778.0 | 170926724.4 | 45.363% | 233809067 | 632201893 |
+| QD2 | Bandwidth (B/s) | 5 | 571864999.2 | 580748171.0 | 19470926.6 | 3.405% | 539661208 | 587812245 |
+| QD1 | Mean total latency (µs) | 5 | 398.911 | 417.000 | 155.162 | 38.897% | 205.254 | 554.600 |
+| QD2 | Mean total latency (µs) | 5 | 444.666 | 440.430 | 16.370 | 3.681% | 429.900 | 472.700 |
+
+These statistics mix legacy and Protocol v2 observations and are therefore descriptive context, not the final controlled-protocol result.
+
+## Protocol v2 subset
+
+The current controlled subset contains three QD1 and three QD2 observations.
+
+| Condition | n (v2) | IOPS mean | IOPS sample SD | IOPS CV |
 |---|---:|---:|---:|---:|
-| EXP001 | 1 | 4823.318 | 632201893 | 205.254 |
-| EXP003 | 1 | 2368.100 | 310386778 | 417.000 |
-| EXP005 | 1 | 3564.400 | 467198745 | 278.400 |
-| EXP007 | 1 | 1834.100 | 240401329 | 539.300 |
-| EXP009 | 1 | 1783.800 | 233809067 | 554.600 |
-| EXP002 | 2 | 4332.267 | 567838870 | 440.430 |
-| EXP004 | 2 | 4484.700 | 587812245 | 429.900 |
-| EXP006 | 2 | 4450.000 | 583264502 | 438.000 |
-| EXP008 | 2 | 4430.800 | 580748171 | 442.300 |
+| QD1 | 3 | 2394.100 | 1033.026 | 43.146% |
+| QD2 | 3 | 4332.700 | 179.245 | 4.137% |
 
-EXP001 and EXP002 are preserved as documented observations because their original raw artifacts were overwritten by subsequent repeat runs. EXP003, EXP004, EXP005, EXP006, EXP007, EXP008, and EXP009 have retained local raw JSON artifacts. Protocol v2 runs also have metadata sidecars.
-
-## Descriptive variability
-
-| Condition | Metric | n | Mean | Sample SD | CV |
-|---|---|---:|---:|---:|---:|
-| QD1 | IOPS | 5 | 2874.744 | 1304.066 | 45.363% |
-| QD2 | IOPS | 4 | 4424.442 | 65.373 | 1.478% |
-| QD1 | Bandwidth | 5 | 376799562.4 B/s | 170926724.4 B/s | 45.363% |
-| QD2 | Bandwidth | 4 | 579915947.0 B/s | 8565682.1 B/s | 1.477% |
-| QD1 | Mean total latency | 5 | 398.911 µs | 155.162 µs | 38.897% |
-| QD2 | Mean total latency | 4 | 437.658 µs | 5.463 µs | 1.248% |
-
-These are sample descriptive statistics. The QD1 condition now has five observations, while QD2 has four; this remains a small host-specific dataset.
+The Protocol v2 subset is still too small to close the planned five-repeat controlled baseline.
 
 ## Interpretation
 
-The five observed QD1 runs continue to show substantial run-to-run variability. QD1 IOPS ranges from 1783.8 to 4823.3, with a descriptive CV of about 45.4%.
+The measurements show materially different run-to-run variability between the QD1 and QD2 groups on this host. However, this remains a measurement-system observation. It does not establish that queue depth itself causes the observed performance difference.
 
-The four observed QD2 runs remain tightly clustered at 4332.3 to 4484.7 IOPS, with a descriptive CV of about 1.48%.
-
-This is a measurement-system observation, not evidence that queue depth itself causes the observed performance difference. QD1 and QD2 are still being characterized under the controlled protocol, and the QD2 condition needs its fifth repeat before the baseline is complete.
+The legacy observations are retained for provenance and historical context but are not silently treated as Protocol v2 replicates.
 
 ## Missing values
 
-Complete latency percentile data are not available in the retained console summaries for EXP003 and EXP004. Those fields remain blank rather than reconstructed or imputed. EXP005 through EXP009 were recorded through the Protocol v2 runner; this checkpoint preserves the headline latency metric reported by the runner.
-
-## Provenance note
-
-EXP001 and EXP002 raw JSON artifacts were overwritten before the current artifact-protection workflow existed. Their reported values are retained only as contemporaneously documented observations and are not reconstructed into synthetic raw FIO JSON.
+Complete latency percentile data are not available in the retained console summaries for EXP003 and EXP004. Those fields remain blank rather than reconstructed or imputed. EXP005 through EXP010 preserve the headline latency metric reported by the runner.
 
 ## Next protocol step
 
-Complete the fifth QD2 repeat under Protocol v2. Do not expand to QD4/QD8 or build performance models until both QD1 and QD2 baseline sets are complete and reviewed.
+Complete two additional Protocol v2 repeats for each condition, maintaining the interleaved design. Only after five Protocol v2 observations per QD1 and QD2 are available and reviewed should the project consider QD4/QD8 or predictive modeling.

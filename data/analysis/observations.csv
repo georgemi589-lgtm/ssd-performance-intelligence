@@ -3,6 +3,7 @@ EXP001,QD1,1,exp001-seq-read,documented_console_and_EXP001_report,false,4823.317
 EXP003,QD1,1,exp001-seq-read,repeat_run_console,true,2368.1,310386778,417.0,,,,,,,,New QD1 repeat; complete raw JSON preserved locally as data/raw/exp003.json.
 EXP005,QD1,1,exp005-seq-read-qd1,protocol_v2_runner,true,3564.4,467198745,278.4,,,,,,,,Protocol v2 QD1 replicate 1; raw JSON and metadata sidecar preserved locally.
 EXP007,QD1,1,exp007-seq-read-qd1,protocol_v2_runner,true,1834.1,240401329,539.3,,,,,,,,Protocol v2 QD1 replicate 2; raw JSON and metadata sidecar preserved locally.
+EXP009,QD1,1,exp009-seq-read-qd1,protocol_v2_runner,true,1783.8,233809067,554.6,,,,,,,,Protocol v2 QD1 replicate 3; raw JSON and metadata sidecar preserved locally.
 EXP002,QD2,2,exp002-seq-read-qd2,documented_console_and_EXP002_result,false,4332.266773,567838870,440.430282,366.592,544.768,700.416,1122.304,8.530659,16.273917,83.726083,Original EXP002 raw artifact was overwritten by a later repeat run; values are preserved from the contemporaneous console record. Achieved iodepth distribution was explicitly observed.
 EXP004,QD2,2,exp004-seq-read-qd2,repeat_run_console,true,4484.7,587812245,429.9,,,,,,,,New QD2 repeat; complete raw JSON preserved locally as data/raw/exp004.json.
 EXP006,QD2,2,exp006-seq-read-qd2,protocol_v2_runner,true,4450.0,583264502,438.0,,,,,,,,Protocol v2 QD2 replicate 1; raw JSON and metadata sidecar preserved locally.

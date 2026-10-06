@@ -179,9 +179,13 @@ def _validate_protocol_v3(config: dict[str, Any]) -> None:
         raise RunnerError("Protocol v3 requires a host_state mapping.")
     for key in ("power_state", "background_activity", "system_update_state"):
         value = host_state.get(key)
-        if not isinstance(value, str) or not value.strip():
+        if (
+            not isinstance(value, str)
+            or not value.strip()
+            or value.strip().upper().startswith("REPLACE_")
+        ):
             raise RunnerError(
-                f"Protocol v3 requires host_state.{key} to be a non-empty string."
+                f"Protocol v3 requires host_state.{key} to contain an observed value, not a placeholder."
             )
 
 

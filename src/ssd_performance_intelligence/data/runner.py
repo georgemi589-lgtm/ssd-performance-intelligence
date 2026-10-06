@@ -401,12 +401,14 @@ def run_experiment(
     config = _load_experiment_config(config_path)
 
     _check_global_safety(config)
-    if execute:
-        protocol_version = str(config.get("protocol", {}).get("version", ""))
+    protocol_version = str(config.get("protocol", {}).get("version", ""))
+    if protocol_version == "3":
+        # Protocol v3 validates metadata even during dry-run so placeholders
+        # cannot reach execution accidentally.
+        _validate_protocol_v3(config)
+    elif execute:
         if protocol_version == "2":
             _validate_protocol_v2(config)
-        elif protocol_version == "3":
-            _validate_protocol_v3(config)
         else:
             raise RunnerError("Executable benchmark configs must declare protocol.version '2' or '3'.")
 

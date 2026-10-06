@@ -4,25 +4,27 @@ This report records the sequential-read repeatability work under Benchmark Proto
 
 ## Protocol v2 subset
 
-The current controlled subset contains four QD1 and four QD2 observations.
+The current controlled subset contains five QD1 and four QD2 observations.
 
 | Condition | n (v2) | IOPS mean | IOPS sample SD | IOPS CV | Mean latency | Latency sample SD | Latency CV |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| QD1 | 4 | 2464.275 | 839.596 | 34.071% | 435.900 µs | 133.866 µs | 30.710% |
+| QD1 | 5 | 2324.440 | 791.492 | 34.051% | not yet recomputed in this ledger | — | — |
 | QD2 | 4 | 4515.725 | 396.551 | 8.782% | 445.650 µs | 18.759 µs | 4.210% |
 
-The controlled baseline is now one QD1 observation away from the planned five-repeat design.
+The planned five-repeat controlled QD1 set is now complete. QD2 still requires one final Protocol v2 observation before the controlled baseline can be closed.
 
 ## Interpretation
 
-EXP012 is the highest observed QD2 IOPS in the current Protocol v2 subset, at 5064.8 IOPS. This increases QD2 run-to-run variability compared with the previous three QD2 observations, but the descriptive QD2 CV remains lower than the current QD1 CV.
+EXP013 produced 1765.1 IOPS, the lowest QD1 observation in the controlled subset. The QD1 IOPS CV remains about 34.1%, showing substantial run-to-run variability.
 
-This remains a measurement-system observation, not evidence that queue depth itself causes the observed performance difference.
+The QD2 subset currently has CV about 8.8% in IOPS after the high 5064.8 IOPS observation from EXP012. QD2 is therefore more variable than earlier estimates suggested, but still tighter than QD1 in this host-specific dataset.
+
+These are descriptive measurement-system observations. They do not establish that queue depth itself causes the observed performance differences.
 
 ## Provenance
 
-Legacy EXP001/EXP002 observations remain explicitly separated from Protocol v2. Their original raw artifacts were overwritten before the current artifact-protection workflow existed. EXP005 through EXP012 are Protocol v2 runs with retained raw JSON and metadata sidecars.
+Legacy EXP001/EXP002 observations remain explicitly separated from Protocol v2. Their original raw artifacts were overwritten before the current artifact-protection workflow existed. EXP005 through EXP013 are Protocol v2 runs with retained raw JSON and metadata sidecars.
 
 ## Next protocol step
 
-Complete the fifth Protocol v2 QD1 observation. Then perform a full baseline review, including run order, descriptive statistics, provenance, and protocol compliance, before deciding whether to expand the experiment matrix.
+Complete the fifth Protocol v2 QD2 observation. Then stop benchmarking and perform the full baseline review, including run order, descriptive statistics, provenance, protocol compliance, and sensitivity to the legacy observations, before deciding whether to expand to QD4/QD8.

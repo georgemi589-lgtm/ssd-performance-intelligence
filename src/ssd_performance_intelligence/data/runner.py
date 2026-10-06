@@ -24,7 +24,9 @@ from __future__ import annotations
 import datetime
 import json
 import os
+import platform
 import re
+import shutil
 import shlex
 import sys
 from pathlib import Path
@@ -124,6 +126,82 @@ def _validate_protocol_v2(config: dict[str, Any]) -> None:
             "Protocol v2 requires an explicit fio.thread setting. "
             "Set it deliberately for the target platform."
         )
+
+def _validate_protocol_v3(config: dict[str, Any]) -> None:
+    """Validate Protocol v3 paired-block and host-state metadata."""
+    experiment_id = str(config.get("experiment_id", ""))
+    if not re.fullmatch(r"EXP\d{3,}", experiment_id):
+        raise RunnerError(
+            "Protocol v3 requires experiment_id in the form EXP### or higher "
+            f"(got {experiment_id!r})."
+        )
+    protocol = config.get("protocol", {})
+    if not isinstance(protocol, dict) or protocol.get("version") != "3":
+        raise RunnerError("Protocol v3 requires protocol.version: '3'.")
+    for key in ("replicate_index", "run_order", "block_id"):
+        value = protocol.get(key)
+        if not isinstance(value, int) or value < 1:
+            raise RunnerError(f"Protocol v3 requires positive integer protocol.{key}.")
+    if protocol["replicate_index"] > 5:
+        raise RunnerError("Protocol v3 replicate_index must be between 1 and 5.")
+    if protocol["run_order"] > 10:
+        raise RunnerError("Protocol v3 run_order must be between 1 and 10.")
+    if protocol["block_id"] > 5:
+        raise RunnerError("Protocol v3 block_id must be between 1 and 5.")
+    if protocol.get("within_block_order") not in (1, 2):
+        raise RunnerError("Protocol v3 within_block_order must be 1 or 2.")
+    if not isinstance(protocol.get("schedule_seed"), str) or not protocol["schedule_seed"].strip():
+        raise RunnerError("Protocol v3 requires a non-empty schedule_seed.")
+    condition = protocol.get("condition")
+    if condition not in ("QD1", "QD2"):
+        raise RunnerError("Protocol v3 requires protocol.condition to be QD1 or QD2.")
+
+    fio = config.get("fio", {})
+    if not isinstance(fio, dict):
+        raise RunnerError("The 'fio' block must be a mapping.")
+    name = str(fio.get("name", ""))
+    if not name.lower().startswith(experiment_id.lower() + "-"):
+        raise RunnerError(
+            "Experiment metadata mismatch: fio.name must start with the "
+            f"experiment_id ({experiment_id.lower()}-)."
+        )
+    if "thread" not in fio:
+        raise RunnerError("Protocol v3 requires an explicit fio.thread setting.")
+
+    expected_qd = 1 if condition == "QD1" else 2
+    if fio.get("iodepth") != expected_qd:
+        raise RunnerError(
+            f"Protocol v3 condition {condition} requires fio.iodepth={expected_qd}."
+        )
+
+    host_state = config.get("host_state")
+    if not isinstance(host_state, dict):
+        raise RunnerError("Protocol v3 requires a host_state mapping.")
+    for key in ("power_state", "background_activity", "system_update_state"):
+        value = host_state.get(key)
+        if not isinstance(value, str) or not value.strip():
+            raise RunnerError(
+                f"Protocol v3 requires host_state.{key} to be a non-empty string."
+            )
+
+
+def _host_snapshot(filename: str) -> dict[str, Any]:
+    """Capture reproducibility-oriented host facts without collecting host identity."""
+    snapshot: dict[str, Any] = {
+        "os_system": platform.system(),
+        "os_release": platform.release(),
+        "os_version": platform.version(),
+        "processor": platform.processor(),
+        "python_version": platform.python_version(),
+        "cpu_count": os.cpu_count(),
+    }
+    try:
+        usage = shutil.disk_usage(filename)
+    except OSError:
+        usage = None
+    snapshot["target_volume_total_bytes"] = usage.total if usage else None
+    snapshot["target_volume_free_bytes_before_run"] = usage.free if usage else None
+    return snapshot
 
 
 def _check_global_safety(config: dict[str, Any]) -> None:
@@ -320,7 +398,13 @@ def run_experiment(
 
     _check_global_safety(config)
     if execute:
-        _validate_protocol_v2(config)
+        protocol_version = str(config.get("protocol", {}).get("version", ""))
+        if protocol_version == "2":
+            _validate_protocol_v2(config)
+        elif protocol_version == "3":
+            _validate_protocol_v3(config)
+        else:
+            raise RunnerError("Executable benchmark configs must declare protocol.version '2' or '3'.")
 
     experiment_id: str = str(config.get("experiment_id", config_path.stem))
     fio_block: dict[str, Any] = config.get("fio", {})
@@ -374,6 +458,8 @@ def run_experiment(
         "timestamp_utc": result["timestamp"],
         "fio_command": cmd,
         "notes": config.get("notes", {}),
+        "host_state": config.get("host_state", {}),
+        "host_snapshot": _host_snapshot(str(fio_block.get("filename", ""))),
     }
     metadata_path = out_path.with_suffix(".metadata.json")
     if metadata_path.exists() and not overwrite:

@@ -1,0 +1,40 @@
+experiment_id: EXP017
+
+protocol:
+  version: "3"
+  replicate_index: 2
+  run_order: 3
+  block_id: 2
+  within_block_order: 1
+  condition: QD1
+  schedule_seed: "2026-10-06-balanced-v1"
+
+host_state:
+  power_state: "REPLACE_WITH_ACTUAL_STATE"
+  background_activity: "REPLACE_WITH_ACTUAL_STATE"
+  system_update_state: "REPLACE_WITH_ACTUAL_STATE"
+
+safety:
+  allow_destructive_benchmarks: false
+  allow_system_disk_tests: false
+
+fio:
+  name: exp017-seq-read-qd1
+  filename: 'C:\fio-lab\exp001_testfile.bin'
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 1
+  ioengine: windowsaio
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1
+  thread: 1
+
+notes:
+  objective: "Protocol v3 QD1 confirmation experiment."
+  comparison: "First run of block 2; QD1 precedes QD2 in the counterbalanced schedule."
+  condition: "QD1"
+  target_file: 'C:\fio-lab\exp001_testfile.bin'
+  limitations: "Descriptive experimental analysis; no causal queue-depth claim from a single run."

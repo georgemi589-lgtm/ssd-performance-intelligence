@@ -17,3 +17,4 @@ EXP015,QD2,2,exp015-seq-read-qd2,protocol_v3_runner,true,4729.5,619908569,419.2,
 EXP016,QD1,1,exp016-seq-read-qd1,protocol_v3_runner,true,2534.0,332142555,392.2,,,,,,,,Protocol v3 QD1 block 1 within-block order 2; raw JSON and metadata sidecar preserved locally.
 EXP017,QD1,1,exp017-seq-read-qd1,protocol_v3_runner,true,2551.5,334436085,389.6,,,,,,,,Protocol v3 QD1 block 2 within-block order 1; raw JSON and metadata sidecar preserved locally.
 EXP018,QD2,2,exp018-seq-read-qd2,protocol_v3_runner,true,4814.9,631100998,412.4,,,,,,,,Protocol v3 QD2 block 2 within-block order 2; raw JSON and metadata sidecar preserved locally.
+EXP019,QD2,2,exp019-seq-read-qd2,protocol_v3_runner,true,4810.1,630471916,412.8,,,,,,,,Protocol v3 QD2 block 3 within-block order 1; raw JSON and metadata sidecar preserved locally.

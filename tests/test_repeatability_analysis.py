@@ -24,8 +24,8 @@ def test_repository_observations_render() -> None:
     report = render_markdown(rows)
     assert "QD1" in report
     assert "QD2" in report
-    assert "Final Protocol v2 dataset" in report
-    assert "EXP014" in report
+    assert "No population-level inference" in report
+    assert "Complete the five-repeat QD1/QD2 baseline" in report
 
 def test_missing_percentiles_are_not_imputed() -> None:
     rows = load_rows(Path("data/analysis/observations.csv"))

@@ -1,4 +1,4 @@
-"""Tests for Protocol v2 runner validation."""
+"""Tests for Protocol v2 and Protocol v3 runner validation."""
 from __future__ import annotations
 
 import pytest
@@ -75,7 +75,7 @@ def test_protocol_v3_accepts_valid_metadata() -> None:
         {"protocol": {"version": "3", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD1", "schedule_seed": "seed"}},
         {"protocol": {"version": "3", "replicate_index": 6, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD2", "schedule_seed": "seed"}},
         {"protocol": {"version": "3", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 3, "condition": "QD2", "schedule_seed": "seed"}},
-        {"protocol": {"version": "3", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD2", "schedule_seed": "seed"}},
+        {"protocol": {"version": "3", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD1", "schedule_seed": "seed"}},
         {"host_state": {"power_state": "", "background_activity": "idle", "system_update_state": "none_observed"}},
         {"host_state": {"power_state": "REPLACE_WITH_ACTUAL_STATE", "background_activity": "idle", "system_update_state": "none_observed"}},
         {"fio": {"name": "exp015-seq-read-qd1", "thread": 1, "iodepth": 1}},

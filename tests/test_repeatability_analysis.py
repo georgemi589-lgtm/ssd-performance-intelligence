@@ -20,11 +20,12 @@ def test_stats_single_observation_has_no_sd() -> None:
 
 def test_repository_observations_render() -> None:
     rows = load_rows(Path("data/analysis/observations.csv"))
-    assert len(rows) == 4
+    assert len(rows) == 14
     report = render_markdown(rows)
     assert "QD1" in report
     assert "QD2" in report
-    assert "not sufficient" in report
+    assert "Final Protocol v2 dataset" in report
+    assert "EXP014" in report
 
 def test_missing_percentiles_are_not_imputed() -> None:
     rows = load_rows(Path("data/analysis/observations.csv"))

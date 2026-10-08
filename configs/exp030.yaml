@@ -1,0 +1,40 @@
+experiment_id: EXP030
+
+protocol:
+  version: "4"
+  replicate_index: 2
+  run_order: 6
+  block_id: 2
+  within_block_order: 2
+  condition: "QD1"
+  schedule_id: "v4-balanced-3rep-v1"
+
+host_state:
+  power_state: "REPLACE_WITH_ACTUAL_STATE"
+  background_activity: "REPLACE_WITH_ACTUAL_STATE"
+  system_update_state: "REPLACE_WITH_ACTUAL_STATE"
+
+safety:
+  allow_destructive_benchmarks: false
+  allow_system_disk_tests: false
+
+fio:
+  name: exp030-seq-read-qd1
+  filename: 'C:\fio-lab\exp001_testfile.bin'
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 1
+  ioengine: windowsaio
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1
+  thread: 1
+
+notes:
+  objective: "Protocol v4 queue-depth scaling screening experiment."
+  comparison: "QD1 second within block 2."
+  condition: "QD1"
+  target_file: 'C:\fio-lab\exp001_testfile.bin'
+  limitations: "Exploratory screening only; no population-level or production-readiness claim."

@@ -20,7 +20,7 @@ def test_stats_single_observation_has_no_sd() -> None:
 
 def test_repository_observations_render() -> None:
     rows = load_rows(Path("data/analysis/observations.csv"))
-    assert len(rows) == 14
+    assert len(rows) == 24
     report = render_markdown(rows)
     assert "QD1" in report
     assert "QD2" in report

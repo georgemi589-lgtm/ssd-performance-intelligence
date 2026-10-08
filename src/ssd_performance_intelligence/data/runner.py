@@ -189,6 +189,72 @@ def _validate_protocol_v3(config: dict[str, Any]) -> None:
             )
 
 
+def _validate_protocol_v4(config: dict[str, Any]) -> None:
+    """Validate the QD1/QD2/QD4/QD8 screening protocol."""
+    experiment_id = str(config.get("experiment_id", ""))
+    if not re.fullmatch(r"EXP\d{3,}", experiment_id):
+        raise RunnerError(
+            "Protocol v4 requires experiment_id in the form EXP### or higher "
+            f"(got {experiment_id!r})."
+        )
+
+    protocol = config.get("protocol", {})
+    if not isinstance(protocol, dict) or protocol.get("version") != "4":
+        raise RunnerError("Protocol v4 requires protocol.version: '4'.")
+
+    for key in ("replicate_index", "run_order", "block_id", "within_block_order"):
+        value = protocol.get(key)
+        if not isinstance(value, int) or value < 1:
+            raise RunnerError(f"Protocol v4 requires positive integer protocol.{key}.")
+
+    if protocol["replicate_index"] > 3:
+        raise RunnerError("Protocol v4 replicate_index must be between 1 and 3.")
+    if protocol["run_order"] > 12:
+        raise RunnerError("Protocol v4 run_order must be between 1 and 12.")
+    if protocol["block_id"] > 3:
+        raise RunnerError("Protocol v4 block_id must be between 1 and 3.")
+    if protocol["within_block_order"] > 4:
+        raise RunnerError("Protocol v4 within_block_order must be between 1 and 4.")
+
+    if not isinstance(protocol.get("schedule_id"), str) or not protocol["schedule_id"].strip():
+        raise RunnerError("Protocol v4 requires a non-empty schedule_id.")
+
+    condition = protocol.get("condition")
+    expected_qd = {"QD1": 1, "QD2": 2, "QD4": 4, "QD8": 8}.get(condition)
+    if expected_qd is None:
+        raise RunnerError("Protocol v4 condition must be one of QD1, QD2, QD4, QD8.")
+
+    fio = config.get("fio", {})
+    if not isinstance(fio, dict):
+        raise RunnerError("The 'fio' block must be a mapping.")
+    name = str(fio.get("name", ""))
+    if not name.lower().startswith(experiment_id.lower() + "-"):
+        raise RunnerError(
+            "Experiment metadata mismatch: fio.name must start with the "
+            f"experiment_id ({experiment_id.lower()}-)."
+        )
+    if "thread" not in fio:
+        raise RunnerError("Protocol v4 requires an explicit fio.thread setting.")
+    if fio.get("iodepth") != expected_qd:
+        raise RunnerError(
+            f"Protocol v4 condition {condition} requires fio.iodepth={expected_qd}."
+        )
+
+    host_state = config.get("host_state")
+    if not isinstance(host_state, dict):
+        raise RunnerError("Protocol v4 requires a host_state mapping.")
+    for key in ("power_state", "background_activity", "system_update_state"):
+        value = host_state.get(key)
+        if (
+            not isinstance(value, str)
+            or not value.strip()
+            or value.strip().upper().startswith("REPLACE_")
+        ):
+            raise RunnerError(
+                f"Protocol v4 requires host_state.{key} to contain an observed value, not a placeholder."
+            )
+
+
 def _host_snapshot(filename: str) -> dict[str, Any]:
     """Capture reproducibility-oriented host facts without collecting host identity."""
     snapshot: dict[str, Any] = {
@@ -406,11 +472,14 @@ def run_experiment(
         # Protocol v3 validates metadata even during dry-run so placeholders
         # cannot reach execution accidentally.
         _validate_protocol_v3(config)
+    elif protocol_version == "4":
+        # Protocol v4 validates metadata even during dry-run.
+        _validate_protocol_v4(config)
     elif execute:
         if protocol_version == "2":
             _validate_protocol_v2(config)
         else:
-            raise RunnerError("Executable benchmark configs must declare protocol.version '2' or '3'.")
+            raise RunnerError("Executable benchmark configs must declare protocol.version '2', '3', or '4'.")
 
     experiment_id: str = str(config.get("experiment_id", config_path.stem))
     fio_block: dict[str, Any] = config.get("fio", {})

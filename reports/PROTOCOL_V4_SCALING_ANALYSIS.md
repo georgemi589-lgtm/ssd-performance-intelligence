@@ -17,7 +17,7 @@ How do measured sequential-read IOPS, bandwidth, mean latency, and run-to-run va
 - Protocol: v4, schedule ID `v4-balanced-3rep-v1`
 - Design: three blocks, with each queue-depth condition appearing once in each block
 - Planned sample size: 12 runs; three observations per condition
-- Target: file-based test file at `C:\\fio-lab\\exp001_testfile.bin`
+- Target: file-based test file at `C:\fio-lab\exp001_testfile.bin`
 - Operation: sequential read only
 - Block size: 128 KiB
 - Configured test size: 256 MiB
@@ -51,15 +51,11 @@ Bandwidth is reported in bytes per second as shown by the runner. Latency is the
 
 ## Descriptive statistics
 
-For a condition with observations (x_1,\ldots,x_n), the report uses the arithmetic mean, sample standard deviation, and coefficient of variation:
+For observations x₁ through xₙ, the report uses:
 
-[
-\bar{x}=\frac{1}{n}\sum_{i=1}^{n}x_i
-\qquad
-s=\sqrt{\frac{\sum_{i=1}^{n}(x_i-\bar{x})^2}{n-1}}
-\qquad
-CV=\frac{s}{\bar{x}}\times100\%.
-]
+- Arithmetic mean = sum of observations divided by n.
+- Sample standard deviation = square root of [sum of squared deviations from the mean divided by (n − 1)].
+- Coefficient of variation (CV) = (sample standard deviation ÷ mean) × 100%.
 
 The standard deviation uses (n-1) in the denominator. With only three runs per condition, the estimates are sensitive to individual observations and are descriptive, not population-level estimates.
 

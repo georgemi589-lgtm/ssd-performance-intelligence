@@ -35,6 +35,6 @@ fio:
 notes:
   objective: "Protocol v5 paired QD4/QD8 confirmation experiment."
   comparison: "QD4 first within block 3."
-  condition: "QD8"
+  condition: "QD4"
   target_file: 'C:\fio-lab\exp001_testfile.bin'
   limitations: "Five-block paired confirmation; descriptive interpretation only and no population-level or production-readiness claim."

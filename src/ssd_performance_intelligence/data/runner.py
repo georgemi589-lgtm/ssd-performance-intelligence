@@ -592,7 +592,7 @@ def run_experiment(
         "output_path": None,
         "metadata_path": None,
         "parsed": None,
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
     if not execute:

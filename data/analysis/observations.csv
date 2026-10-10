@@ -23,3 +23,15 @@ EXP021,QD1,1,exp021-seq-read-qd1,protocol_v3_runner,true,2432.3,318800759,408.7,
 EXP022,QD2,2,exp022-seq-read-qd2,protocol_v3_runner,true,4861.1,637155919,408.7,,,,,,,,Protocol v3 QD2 block 4 within-block order 2; raw JSON and metadata sidecar preserved locally.
 EXP023,QD2,2,exp023-seq-read-qd2,protocol_v3_runner,true,3934.6,515716748,496.3,,,,,,,,Protocol v3 QD2 block 5 within-block order 1; raw JSON and metadata sidecar preserved locally.
 EXP024,QD1,1,exp024-seq-read-qd1,protocol_v3_runner,true,1874.7,245722320,528.1,,,,,,,,Protocol v3 QD1 block 5 within-block order 2; raw JSON and metadata sidecar preserved locally.
+EXP025,QD2,2,exp025-seq-read-qd2,protocol_v4_runner,true,3788.7,496595255,513.7,,,,,,,,Protocol v4 block 1 position 1; raw JSON reported saved locally.
+EXP026,QD8,8,exp026-seq-read-qd8,protocol_v4_runner,true,5433.9,712233873,1454.9,,,,,,,,Protocol v4 block 1 position 2; raw JSON reported saved locally.
+EXP027,QD1,1,exp027-seq-read-qd1,protocol_v4_runner,true,1791.3,234792008,552.4,,,,,,,,Protocol v4 block 1 position 3; raw JSON reported saved locally.
+EXP028,QD4,4,exp028-seq-read-qd4,protocol_v4_runner,true,5884.2,771255380,667.5,,,,,,,,Protocol v4 block 1 position 4; raw JSON reported saved locally.
+EXP029,QD4,4,exp029-seq-read-qd4,protocol_v4_runner,true,5544,726669144,708.6,,,,,,,,Protocol v4 block 2 position 1; raw JSON reported saved locally.
+EXP030,QD1,1,exp030-seq-read-qd1,protocol_v4_runner,true,1749.1,229261323,565.9,,,,,,,,Protocol v4 block 2 position 2; raw JSON reported saved locally.
+EXP031,QD8,8,exp031-seq-read-qd8,protocol_v4_runner,true,3963.8,519546512,1999.2,,,,,,,,Protocol v4 block 2 position 3; raw JSON reported saved locally.
+EXP032,QD2,2,exp032-seq-read-qd2,protocol_v4_runner,true,3656.6,479282375,531.6,,,,,,,,Protocol v4 block 2 position 4; raw JSON reported saved locally.
+EXP033,QD1,1,exp033-seq-read-qd1,protocol_v4_runner,true,1697.7,222524896,582.8,,,,,,,,Protocol v4 block 3 position 1; raw JSON reported saved locally.
+EXP034,QD4,4,exp034-seq-read-qd4,protocol_v4_runner,true,5859.7,768044437,679.5,,,,,,,,Protocol v4 block 3 position 2; the scheduled run artifact is preserved. Two accidental duplicate commands later invoked FIO before rejection and their unsaved outputs are excluded from this ledger.
+EXP035,QD2,2,exp035-seq-read-qd2,protocol_v4_runner,true,3807.3,499032951,514.5,,,,,,,,Protocol v4 block 3 position 3; raw JSON reported saved locally.
+EXP036,QD8,8,exp036-seq-read-qd8,protocol_v4_runner,true,6032.9,790743406,1309.4,,,,,,,,Protocol v4 block 3 position 4; raw JSON reported saved locally.

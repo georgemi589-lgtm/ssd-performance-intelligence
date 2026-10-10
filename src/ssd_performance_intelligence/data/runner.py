@@ -380,6 +380,32 @@ def _output_json_path(experiment_id: str) -> Path:
     return RAW_DATA_DIR / f"{safe_id}.json"
 
 
+
+def _check_artifacts_available(
+    out_path: Path, metadata_path: Path, *, overwrite: bool
+) -> None:
+    """Refuse duplicate experiment IDs before FIO runs or artifacts are written.
+
+    This guard is run once before invoking FIO and again immediately before
+    writing artifacts, so an already-completed experiment cannot accidentally
+    trigger another benchmark run.
+    """
+    if overwrite:
+        return
+    if out_path.exists():
+        raise RunnerError(
+            f"Raw output already exists: {out_path}. "
+            "Use a new experiment_id for a new run, or pass --overwrite only "
+            "when intentionally replacing that artifact."
+        )
+    if metadata_path.exists():
+        raise RunnerError(
+            f"Protocol metadata already exists: {metadata_path}. "
+            "Use a new experiment_id for a new run, or pass --overwrite only "
+            "when intentionally replacing that artifact."
+        )
+
+
 # ---------------------------------------------------------------------------
 # Execution (only reached when execute=True)
 # ---------------------------------------------------------------------------
@@ -504,19 +530,21 @@ def run_experiment(
         return result
 
     # ---- actual execution path ----------------------------------------
+    out_dir = output_dir if output_dir is not None else RAW_DATA_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    safe_id = experiment_id.lower().replace(" ", "_")
+    out_path = out_dir / f"{safe_id}.json"
+    metadata_path = out_path.with_suffix(".metadata.json")
+
+    # Critical duplicate-run guard: check both artifacts BEFORE FIO starts.
+    _check_artifacts_available(out_path, metadata_path, overwrite=overwrite)
+
     raw_stdout = _invoke_fio(cmd, timeout_s=fio_timeout_s)
     parsed: ParsedFioOutput = parse_fio_output(raw_stdout)
 
-    out_dir = output_dir if output_dir is not None else RAW_DATA_DIR
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"{experiment_id.lower().replace(' ', '_')}.json"
-
-    if out_path.exists() and not overwrite:
-        raise RunnerError(
-            f"Raw output already exists: {out_path}. "
-            "Use a new experiment_id for a new run, or pass --overwrite only "
-            "when intentionally replacing that artifact."
-        )
+    # Defensive second check before writing, in case another process created an
+    # artifact while this FIO run was in progress.
+    _check_artifacts_available(out_path, metadata_path, overwrite=overwrite)
 
     # Write the raw JSON payload (not the normalized Python object) to disk.
     out_path.write_text(
@@ -536,13 +564,6 @@ def run_experiment(
         "host_state": config.get("host_state", {}),
         "host_snapshot": _host_snapshot(str(fio_block.get("filename", ""))),
     }
-    metadata_path = out_path.with_suffix(".metadata.json")
-    if metadata_path.exists() and not overwrite:
-        out_path.unlink()
-        raise RunnerError(
-            f"Protocol metadata already exists: {metadata_path}. "
-            "Use a new experiment_id for a new run."
-        )
     metadata_path.write_text(
         json.dumps(metadata, indent=2, ensure_ascii=False),
         encoding="utf-8",

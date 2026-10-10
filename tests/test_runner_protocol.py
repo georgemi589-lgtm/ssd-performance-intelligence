@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from ssd_performance_intelligence.data.runner import RunnerError, _validate_protocol_v2, _validate_protocol_v3, _validate_protocol_v4
+from ssd_performance_intelligence.data.runner import RunnerError, _validate_protocol_v2, _validate_protocol_v3, _validate_protocol_v4, _validate_protocol_v5
 
 
 def _config() -> dict:
@@ -134,3 +134,53 @@ def test_protocol_v4_rejects_invalid_metadata(change: dict) -> None:
     config.update(change)
     with pytest.raises(RunnerError):
         _validate_protocol_v4(config)
+
+
+
+def _config_v5() -> dict:
+    return {
+        "experiment_id": "EXP037",
+        "protocol": {
+            "version": "5",
+            "replicate_index": 1,
+            "run_order": 1,
+            "block_id": 1,
+            "within_block_order": 1,
+            "condition": "QD8",
+            "schedule_id": "v5-qd4-qd8-paired-5block-v1",
+        },
+        "host_state": {
+            "power_state": "plugged_in",
+            "background_activity": "idle",
+            "system_update_state": "none_observed",
+        },
+        "fio": {
+            "name": "exp037-seq-read-qd8",
+            "thread": 1,
+            "iodepth": 8,
+        },
+    }
+
+
+def test_protocol_v5_accepts_valid_metadata() -> None:
+    _validate_protocol_v5(_config_v5())
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"protocol": {"version": "4", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD8", "schedule_id": "seed"}},
+        {"protocol": {"version": "5", "replicate_index": 6, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD8", "schedule_id": "seed"}},
+        {"protocol": {"version": "5", "replicate_index": 1, "run_order": 11, "block_id": 1, "within_block_order": 1, "condition": "QD8", "schedule_id": "seed"}},
+        {"protocol": {"version": "5", "replicate_index": 1, "run_order": 1, "block_id": 6, "within_block_order": 1, "condition": "QD8", "schedule_id": "seed"}},
+        {"protocol": {"version": "5", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 3, "condition": "QD8", "schedule_id": "seed"}},
+        {"protocol": {"version": "5", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD2", "schedule_id": "seed"}},
+        {"fio": {"name": "exp037-seq-read-qd8", "thread": 1, "iodepth": 4}},
+        {"host_state": {"power_state": "REPLACE_WITH_ACTUAL_STATE", "background_activity": "idle", "system_update_state": "none_observed"}},
+    ],
+)
+def test_protocol_v5_rejects_invalid_metadata(change: dict) -> None:
+    config = _config_v5()
+    config.update(change)
+    with pytest.raises(RunnerError):
+        _validate_protocol_v5(config)

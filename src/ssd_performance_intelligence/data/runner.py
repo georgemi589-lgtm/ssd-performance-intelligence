@@ -259,7 +259,7 @@ def _validate_protocol_v4(config: dict[str, Any]) -> None:
 def _validate_protocol_v5(config: dict[str, Any]) -> None:
     """Validate the five-block paired QD4/QD8 confirmation protocol."""
     experiment_id = str(config.get("experiment_id", ""))
-    if not re.fullmatch(r"EXP\\d{3,}", experiment_id):
+    if not re.fullmatch(r"EXP\d{3,}", experiment_id):
         raise RunnerError(
             "Protocol v5 requires experiment_id in the form EXP### or higher "
             f"(got {experiment_id!r})."

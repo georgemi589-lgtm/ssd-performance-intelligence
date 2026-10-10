@@ -115,8 +115,8 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "## Current interpretation",
         "",
         "- These observations are descriptive measurements from this host under the documented protocol.",
-        "- The ledger now includes QD1, QD2, QD4, and QD8 observations from different protocols; pooled values mix protocol designs and are an inventory summary only.
-- Use protocol-specific reports for queue-depth comparisons. The Protocol v4 report contains the dedicated QD1/QD2/QD4/QD8 screening analysis.",
+        "- The ledger now includes QD1, QD2, QD4, and QD8 observations from different protocols; pooled values mix protocol designs and are an inventory summary only.",
+        "- Use protocol-specific reports for queue-depth comparisons. The Protocol v4 report contains the dedicated QD1/QD2/QD4/QD8 screening analysis.",
         "- No population-level inference, causal claim, or production-readiness conclusion is drawn.",
         "",
         "## Missing values",

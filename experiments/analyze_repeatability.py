@@ -74,7 +74,7 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
     lines = [
         "# SSD benchmark repeatability analysis",
         "",
-        "Descriptive analysis of the documented sequential-read observations. This does not estimate population parameters or establish causality.",
+        "Descriptive inventory of sequential-read observations across legacy and Protocol v2-v4 runs. Because these observations use different protocols and run designs, pooled condition summaries are not protocol-specific estimates and must not be used to infer a queue-depth effect. This report does not estimate population parameters or establish causality.",
         "",
         "## Observation provenance",
         "",
@@ -115,7 +115,8 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "## Current interpretation",
         "",
         "- These observations are descriptive measurements from this host under the documented protocol.",
-        "- The current QD1 and QD2 groups show different amounts of run-to-run variability, so raw differences should not be attributed to queue depth alone.",
+        "- The ledger now includes QD1, QD2, QD4, and QD8 observations from different protocols; pooled values mix protocol designs and are an inventory summary only.
+- Use protocol-specific reports for queue-depth comparisons. The Protocol v4 report contains the dedicated QD1/QD2/QD4/QD8 screening analysis.",
         "- No population-level inference, causal claim, or production-readiness conclusion is drawn.",
         "",
         "## Missing values",

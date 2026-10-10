@@ -72,7 +72,7 @@ def stats(values: list[float]) -> dict[str, float | int | None]:
 def render_markdown(rows: list[dict[str, str]]) -> str:
     conditions = sorted({row["condition"] for row in rows})
     lines = [
-        "# QD1/QD2 repeatability analysis",
+        "# SSD benchmark repeatability analysis",
         "",
         "Descriptive analysis of the documented sequential-read observations. This does not estimate population parameters or establish causality.",
         "",
@@ -124,7 +124,7 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "",
         "## Next decision",
         "",
-        "Complete the five-repeat QD1/QD2 baseline under Protocol v2 before introducing QD4/QD8 or building predictive models.",
+        "Audit local raw JSON and metadata sidecars, then pursue the planned QD4-versus-QD8 confirmation. Do not build predictive models from this screening ledger alone.",
     ]
     return "\n".join(lines) + "\n"
 

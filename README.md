@@ -2,7 +2,7 @@
 
 Evidence-based research prototype for **AI-based SSD performance and workload intelligence**.
 
-This repository is a structured starting point for studying how storage workloads relate to SSD behavior (throughput, latency, and related telemetry). It does **not** contain trained models. The current evidence base includes the initial EXP001/EXP002 observations plus QD1/QD2 repeat measurements and a repeatability analysis ([report](reports/QD1_QD2_repeatability.md)). These measurements are host-level observations, not device specifications or maximum-performance results.
+This repository is an evidence-first R&D prototype for studying how storage workloads relate to SSD performance (throughput, latency, and related telemetry). It does **not** contain trained models. The recorded study sequence now includes legacy observations and controlled Protocol v2–v4 experiments. Protocol v4 screened QD1/QD2/QD4/QD8 with 12 scheduled read-only runs. In that screen, QD4 had the highest mean throughput, while QD8 showed materially greater variability and higher mean latency; these host/workload-specific observations justify follow-up testing, not a universal SSD conclusion. See the [Protocol v4 analysis](reports/PROTOCOL_V4_SCALING_ANALYSIS.md), [Protocol v3 confirmation analysis](reports/PROTOCOL_V3_CONFIRMATION_ANALYSIS.md), and [QD1/QD2 repeatability report](reports/QD1_QD2_repeatability.md). The summary ledger is tracked at `data/analysis/observations.csv`; raw JSON and metadata sidecars remain local and are intentionally ignored by Git. These are host-level observations, not device specifications or maximum-performance results.
 
 ## Research problem
 
@@ -41,8 +41,9 @@ No accuracy, speedup, ranking, or peak-SSD claims are made. EXP001 is reported w
 
 ## Limitations
 
-- **Sparse measurements.** EXP001 is a single sequential-read FIO job. `data/` is otherwise empty; do not treat placeholders as hidden results. Device model for EXP001 is unknown.
+- **Scope and sample size.** Protocol v4 has only three scheduled observations per queue-depth condition on one host and one file-based workload. The v4 report documents two unsaved duplicate FIO invocations after EXP034; those results are excluded and the protocol deviation may have affected later host state.
 - **Device diversity.** SSD behavior depends on NAND type, controller, DRAM/HMB, firmware, interface (SATA/NVMe), and host stack. Early findings will not generalize by default.
+- **Artifact availability.** Raw FIO JSON and metadata sidecars are local-only by default. The tracked observation ledger summarizes reported results; verify local artifacts before reproducing the analysis.
 - **Observability.** Host-level I/O stats omit much of FTL, GC, and NAND-level state.
 - **Ethics and safety.** Benchmarks that wear devices or disrupt a user’s machine are excluded unless explicitly designed, isolated, and documented later.
 - **Reproducibility burden.** Any future number in `reports/` must cite config, data hash, code version, and hardware context.

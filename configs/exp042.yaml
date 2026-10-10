@@ -1,0 +1,40 @@
+experiment_id: EXP042
+
+protocol:
+  version: "5"
+  replicate_index: 3
+  run_order: 6
+  block_id: 3
+  within_block_order: 2
+  condition: "QD8"
+  schedule_id: "v5-qd4-qd8-paired-5block-v1"
+
+host_state:
+  power_state: "REPLACE_WITH_ACTUAL_STATE"
+  background_activity: "REPLACE_WITH_ACTUAL_STATE"
+  system_update_state: "REPLACE_WITH_ACTUAL_STATE"
+
+safety:
+  allow_destructive_benchmarks: false
+  allow_system_disk_tests: false
+
+fio:
+  name: exp042-seq-read-qd8
+  filename: 'C:\fio-lab\exp001_testfile.bin'
+  size: 256M
+  rw: read
+  bs: 128k
+  iodepth: 8
+  ioengine: windowsaio
+  direct: 1
+  runtime: 10
+  time_based: 1
+  group_reporting: 1
+  thread: 1
+
+notes:
+  objective: "Protocol v5 paired QD4/QD8 confirmation experiment."
+  comparison: "QD4 first; QD8 second within block 3."
+  condition: "QD8"
+  target_file: 'C:\fio-lab\exp001_testfile.bin'
+  limitations: "Five-block paired confirmation; descriptive interpretation only and no population-level or production-readiness claim."

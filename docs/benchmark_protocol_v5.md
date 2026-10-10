@@ -17,7 +17,7 @@ This protocol is confirmatory for the observed QD4/QD8 pattern, but five pairs o
 - Within-block order is counterbalanced as evenly as possible: QD8 runs first in blocks 1 and 4; QD4 runs first in blocks 2, 3, and 5.
 - Schedule ID: `v5-qd4-qd8-paired-5block-v1`
 - Configurations: `configs/exp037.yaml` through `configs/exp046.yaml`.
-- The schedule and condition order must not be changed after results are observed.
+- The schedule and condition order must not be changed once the first scheduled run starts.
 
 This is counterbalanced, not randomized. It is not a fully balanced crossover, because five pairs require one condition to be first in one more block than the other. The order is prespecified to avoid always running one condition first.
 
@@ -25,7 +25,7 @@ This is counterbalanced, not randomized. It is not a fully balanced crossover, b
 
 Keep the workload the same as Protocol v4:
 
-- file-based target only: `C:\\fio-lab\\exp001_testfile.bin`
+- file-based target only: `C:\fio-lab\exp001_testfile.bin`
 - sequential read only (`rw=read`)
 - block size: 128 KiB
 - configured test size: 256 MiB

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from ssd_performance_intelligence.data.runner import RunnerError, _validate_protocol_v2, _validate_protocol_v3, _validate_protocol_v4, _validate_protocol_v5
+from ssd_performance_intelligence.data.runner import RunnerError, _validate_protocol_v2, _validate_protocol_v3, _validate_protocol_v4, _validate_protocol_v5, _validate_protocol_v6
 
 
 def _config() -> dict:
@@ -184,3 +184,51 @@ def test_protocol_v5_rejects_invalid_metadata(change: dict) -> None:
     config.update(change)
     with pytest.raises(RunnerError):
         _validate_protocol_v5(config)
+
+
+
+def _config_v6() -> dict:
+    return {
+        "experiment_id": "EXP047",
+        "protocol": {
+            "version": "6",
+            "replicate_index": 1,
+            "run_order": 1,
+            "block_id": 1,
+            "within_block_order": 1,
+            "condition": "QD8",
+            "schedule_id": "v6-4k-seq-qd4-qd8-paired-5block-v1",
+        },
+        "host_state": {
+            "power_state": "plugged_in",
+            "background_activity": "idle",
+            "system_update_state": "none_observed",
+        },
+        "fio": {
+            "name": "exp047-seq-read-qd8",
+            "thread": 1,
+            "iodepth": 8,
+            "bs": "4k",
+        },
+    }
+
+
+def test_protocol_v6_accepts_valid_metadata() -> None:
+    _validate_protocol_v6(_config_v6())
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"protocol": {"version": "5", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD8", "schedule_id": "seed"}},
+        {"fio": {"name": "exp047-seq-read-qd8", "thread": 1, "iodepth": 8, "bs": "128k"}},
+        {"protocol": {"version": "6", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD2", "schedule_id": "seed"}},
+        {"fio": {"name": "exp047-seq-read-qd8", "thread": 1, "iodepth": 4, "bs": "4k"}},
+        {"host_state": {"power_state": "REPLACE_WITH_ACTUAL_STATE", "background_activity": "idle", "system_update_state": "none_observed"}},
+    ],
+)
+def test_protocol_v6_rejects_invalid_metadata(change: dict) -> None:
+    config = _config_v6()
+    config.update(change)
+    with pytest.raises(RunnerError):
+        _validate_protocol_v6(config)

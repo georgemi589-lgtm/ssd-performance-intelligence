@@ -12,7 +12,16 @@ from __future__ import annotations
 
 import json
 import statistics
+import sys
 from pathlib import Path
+
+# When launched as "python experiments/<script>.py", Python places the
+# experiments directory—not necessarily the repository root—at sys.path[0].
+# Add the repository root so imports between local project scripts resolve
+# consistently from PowerShell and other working directories.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from experiments.analyze_protocol_v5 import RAW_DIR, SCHEDULE, load_observations
 from ssd_performance_intelligence.data.fio_parser import parse_fio_file

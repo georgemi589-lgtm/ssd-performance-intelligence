@@ -176,6 +176,7 @@ def test_protocol_v5_accepts_valid_metadata() -> None:
         {"protocol": {"version": "5", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 3, "condition": "QD8", "schedule_id": "seed"}},
         {"protocol": {"version": "5", "replicate_index": 1, "run_order": 1, "block_id": 1, "within_block_order": 1, "condition": "QD2", "schedule_id": "seed"}},
         {"fio": {"name": "exp037-seq-read-qd8", "thread": 1, "iodepth": 4}},
+        {"fio": {"name": "exp037-seq-read-qd4", "thread": 1, "iodepth": 8}},
         {"host_state": {"power_state": "REPLACE_WITH_ACTUAL_STATE", "background_activity": "idle", "system_update_state": "none_observed"}},
     ],
 )

@@ -121,12 +121,6 @@ def _validate_protocol_v2(config: dict[str, Any]) -> None:
             "Experiment metadata mismatch: fio.name must start with the "
             f"experiment_id ({experiment_id.lower()}-)."
         )
-    expected_suffix = f"-qd{expected_qd}"
-    if not name.lower().endswith(expected_suffix):
-        raise RunnerError(
-            f"Protocol v5 condition {condition} requires fio.name to end with "
-            f"{expected_suffix!r} so the job name matches the configured queue depth."
-        )
     if "thread" not in fio:
         raise RunnerError(
             "Protocol v2 requires an explicit fio.thread setting. "
@@ -305,6 +299,12 @@ def _validate_protocol_v5(config: dict[str, Any]) -> None:
         raise RunnerError(
             "Experiment metadata mismatch: fio.name must start with the "
             f"experiment_id ({experiment_id.lower()}-)."
+        )
+    expected_suffix = f"-qd{expected_qd}"
+    if not name.lower().endswith(expected_suffix):
+        raise RunnerError(
+            f"Protocol v5 condition {condition} requires fio.name to end with "
+            f"{expected_suffix!r} so the job name matches the configured queue depth."
         )
     if "thread" not in fio:
         raise RunnerError("Protocol v5 requires an explicit fio.thread setting.")

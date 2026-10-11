@@ -19,7 +19,7 @@ safety:
   allow_system_disk_tests: false
 
 fio:
-  name: exp051-seq-read-qd8
+  name: exp051-seq-read-qd4
   filename: 'C:\fio-lab\exp001_testfile.bin'
   size: 256M
   rw: read

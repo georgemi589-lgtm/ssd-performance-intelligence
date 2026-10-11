@@ -59,8 +59,15 @@ def test_paired_differences_are_qd4_minus_qd8_in_block_order() -> None:
         (4, 80.0, 120.0),
         (5, 105.0, 100.0),
     ):
-        rows.append(make_observation(f"EXP{46 + block:03d}", "QD4", block, qd4))
-        rows.append(make_observation(f"EXP{47 + block:03d}", "QD8", block, qd8))
+        qd4_id, qd8_id = {
+            1: ("EXP048", "EXP047"),
+            2: ("EXP049", "EXP050"),
+            3: ("EXP051", "EXP052"),
+            4: ("EXP054", "EXP053"),
+            5: ("EXP055", "EXP056"),
+        }[block]
+        rows.append(make_observation(qd4_id, "QD4", block, qd4))
+        rows.append(make_observation(qd8_id, "QD8", block, qd8))
     assert paired_differences(rows) == [
         (1, -10.0), (2, 10.0), (3, 0.0), (4, -40.0), (5, 5.0)
     ]

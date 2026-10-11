@@ -321,6 +321,25 @@ def _validate_protocol_v5(config: dict[str, Any]) -> None:
                 f"Protocol v5 requires host_state.{key} to contain an observed value, not a placeholder."
             )
 
+
+def _validate_protocol_v6(config: dict[str, Any]) -> None:
+    """Validate the five-block QD4/QD8 confirmation using 4 KiB reads."""
+    protocol = config.get("protocol", {})
+    if not isinstance(protocol, dict) or protocol.get("version") != "6":
+        raise RunnerError("Protocol v6 requires protocol.version: '6'.")
+
+    fio = config.get("fio", {})
+    if not isinstance(fio, dict) or fio.get("bs") != "4k":
+        raise RunnerError("Protocol v6 requires fio.bs='4k' for the 4 KiB read workload.")
+
+    # Reuse the established v5 schedule, queue-depth, and host-state checks.
+    # Only the protocol version and block size differ in this study.
+    adapted = dict(config)
+    adapted_protocol = dict(protocol)
+    adapted_protocol["version"] = "5"
+    adapted["protocol"] = adapted_protocol
+    _validate_protocol_v5(adapted)
+
 def _host_snapshot(filename: str) -> dict[str, Any]:
     """Capture reproducibility-oriented host facts without collecting host identity."""
     snapshot: dict[str, Any] = {
@@ -570,11 +589,14 @@ def run_experiment(
     elif protocol_version == "5":
         # Protocol v5 validates paired-confirmation metadata even during dry-run.
         _validate_protocol_v5(config)
+    elif protocol_version == "6":
+        # Protocol v6 validates the 4 KiB paired workload, including dry-runs.
+        _validate_protocol_v6(config)
     elif execute:
         if protocol_version == "2":
             _validate_protocol_v2(config)
         else:
-            raise RunnerError("Executable benchmark configs must declare protocol.version '2', '3', '4', or '5'.")
+            raise RunnerError("Executable benchmark configs must declare protocol.version '2', '3', '4', '5', or '6'.")
 
     experiment_id: str = str(config.get("experiment_id", config_path.stem))
     fio_block: dict[str, Any] = config.get("fio", {})

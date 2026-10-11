@@ -35,3 +35,13 @@ EXP033,QD1,1,exp033-seq-read-qd1,protocol_v4_runner,true,1697.7,222524896,582.8,
 EXP034,QD4,4,exp034-seq-read-qd4,protocol_v4_runner,true,5859.7,768044437,679.5,,,,,,,,Protocol v4 block 3 position 2; the scheduled run artifact is preserved. Two accidental duplicate commands later invoked FIO before rejection and their unsaved outputs are excluded from this ledger.
 EXP035,QD2,2,exp035-seq-read-qd2,protocol_v4_runner,true,3807.3,499032951,514.5,,,,,,,,Protocol v4 block 3 position 3; raw JSON reported saved locally.
 EXP036,QD8,8,exp036-seq-read-qd8,protocol_v4_runner,true,6032.9,790743406,1309.4,,,,,,,,Protocol v4 block 3 position 4; raw JSON reported saved locally.
+EXP037,QD8,8,exp037-seq-read-qd8,protocol_v5_runner,true,6010.3,787781771,1308.6,,,,,,,,Protocol v5 block 1 position 1; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP038,QD4,4,exp038-seq-read-qd4,protocol_v5_runner,true,5532.9,725214390,710.0,,,,,,,,Protocol v5 block 1 position 2; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP039,QD4,4,exp039-seq-read-qd4,protocol_v5_runner,true,5559.4,728687451,707.9,,,,,,,,Protocol v5 block 2 position 1; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP040,QD8,8,exp040-seq-read-qd8,protocol_v5_runner,true,5355.9,702012301,1470.2,,,,,,,,Protocol v5 block 2 position 2; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP041,QD4,4,exp041-seq-read-qd4,protocol_v5_runner,true,5491.1,719723022,714.6,,,,,,,,Protocol v5 block 3 position 1; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP042,QD8,8,exp042-seq-read-qd8,protocol_v5_runner,true,5946.5,779421050,1317.5,,,,,,,,Protocol v5 block 3 position 2; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP043,QD8,8,exp043-seq-read-qd8,protocol_v5_runner,true,5456.4,715182403,1436.9,,,,,,,,Protocol v5 block 4 position 1; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP044,QD4,4,exp044-seq-read-qd4,protocol_v5_runner,true,5391.3,706643345,724.5,,,,,,,,Protocol v5 block 4 position 2; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP045,QD4,4,exp045-seq-read-qd4,protocol_v5_runner,true,5501.5,721099141,712.4,,,,,,,,Protocol v5 block 5 position 1; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP046,QD8,8,exp046-seq-read-qd8,protocol_v5_runner,true,4840.5,634457630,1633.2,,,,,,,,Protocol v5 block 5 position 2; FIO 3.43; raw JSON and metadata passed the local analysis audit.

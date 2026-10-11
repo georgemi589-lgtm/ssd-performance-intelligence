@@ -45,3 +45,13 @@ EXP043,QD8,8,exp043-seq-read-qd8,protocol_v5_runner,true,5456.4,715182403,1436.9
 EXP044,QD4,4,exp044-seq-read-qd4,protocol_v5_runner,true,5391.3,706643345,724.5,,,,,,,,Protocol v5 block 4 position 2; FIO 3.43; raw JSON and metadata passed the local analysis audit.
 EXP045,QD4,4,exp045-seq-read-qd4,protocol_v5_runner,true,5501.5,721099141,712.4,,,,,,,,Protocol v5 block 5 position 1; FIO 3.43; raw JSON and metadata passed the local analysis audit.
 EXP046,QD8,8,exp046-seq-read-qd8,protocol_v5_runner,true,4840.5,634457630,1633.2,,,,,,,,Protocol v5 block 5 position 2; FIO 3.43; raw JSON and metadata passed the local analysis audit.
+EXP047,QD8,8,exp047-seq-read-qd8,protocol_v6_runner,true,53519.0,219214020,137.8,,,,,,,,Protocol v6 4 KiB sequential-read block 1 position 1; runner summary entered; local artifact diagnostics pending.
+EXP048,QD4,4,exp048-seq-read-qd4,protocol_v6_runner,true,34736.0,142278764,108.7,,,,,,,,Protocol v6 4 KiB sequential-read block 1 position 2; runner summary entered; local artifact diagnostics pending.
+EXP049,QD4,4,exp049-seq-read-qd4,protocol_v6_runner,true,29229.5,119723938,129.1,,,,,,,,Protocol v6 4 KiB sequential-read block 2 position 1; runner summary entered; local artifact diagnostics pending.
+EXP050,QD8,8,exp050-seq-read-qd8,protocol_v6_runner,true,55043.2,225456929,132.3,,,,,,,,Protocol v6 4 KiB sequential-read block 2 position 2; runner summary entered; local artifact diagnostics pending.
+EXP051,QD4,4,exp051-seq-read-qd4,protocol_v6_runner,true,29805.6,122083817,127.6,,,,,,,,Protocol v6 4 KiB sequential-read block 3 position 1; runner summary entered; local artifact diagnostics pending.
+EXP052,QD8,8,exp052-seq-read-qd8,protocol_v6_runner,true,38614.8,158166378,195.6,,,,,,,,Protocol v6 4 KiB sequential-read block 3 position 2; runner summary entered; local artifact diagnostics pending.
+EXP053,QD8,8,exp053-seq-read-qd8,protocol_v6_runner,true,55585.2,227677149,131.3,,,,,,,,Protocol v6 4 KiB sequential-read block 4 position 1; runner summary entered; local artifact diagnostics pending.
+EXP054,QD4,4,exp054-seq-read-qd4,protocol_v6_runner,true,36707.0,150351992,103.2,,,,,,,,Protocol v6 4 KiB sequential-read block 4 position 2; runner summary entered; local artifact diagnostics pending.
+EXP055,QD4,4,exp055-seq-read-qd4,protocol_v6_runner,true,18135.8,74284181,214.0,,,,,,,,Protocol v6 4 KiB sequential-read block 5 position 1; runner summary entered; retain low-throughput observation; local artifact diagnostics pending.
+EXP056,QD8,8,exp056-seq-read-qd8,protocol_v6_runner,true,52282.1,214147366,137.7,,,,,,,,Protocol v6 4 KiB sequential-read block 5 position 2; runner summary entered; local artifact diagnostics pending.

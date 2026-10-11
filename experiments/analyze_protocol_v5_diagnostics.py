@@ -139,7 +139,7 @@ def build_markdown_report(rows: list[dict]) -> str:
         "No additional QD4/QD8 runs are recommended immediately. Preserve these results and finalize the primary Protocol v5 report with the latency diagnostics. A next study should be designed only after defining a new question, such as whether this latency trade-off generalizes to a different read-only block size or access pattern. Do not claim generalization from this host alone.",
         "",
     ]
-    return "\\n".join(lines)
+    return "\n".join(lines)
 
 
 def main() -> int:
@@ -249,7 +249,7 @@ def main() -> int:
         report = build_markdown_report(diagnostic_rows)
         REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
         REPORT_PATH.write_text(report, encoding="utf-8")
-        print(f"\\nReport written: {REPORT_PATH.relative_to(REPO_ROOT)}")
+        print(f"\nReport written: {REPORT_PATH.relative_to(REPO_ROOT)}")
     else:
         print()
         print("No files were written. Add --write-report to save the diagnostics report.")

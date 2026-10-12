@@ -272,6 +272,18 @@ def make_report(rows: list[Observation]) -> str:
         else "FIO versions differ across this study: " + ", ".join(versions) +
              ". Treat version variation as a possible confound."
     )
+    qd4_rows = [row for row in rows if row.condition == "QD4"]
+    qd8_rows = [row for row in rows if row.condition == "QD8"]
+    qd4_mean_iops = statistics.mean(row.iops for row in qd4_rows)
+    qd8_mean_iops = statistics.mean(row.iops for row in qd8_rows)
+    qd4_mean_total = statistics.mean(row.mean_total_latency_us for row in qd4_rows)
+    qd8_mean_total = statistics.mean(row.mean_total_latency_us for row in qd8_rows)
+    iops_uplift_pct = (qd8_mean_iops / qd4_mean_iops - 1.0) * 100.0
+    latency_uplift_pct = (qd8_mean_total / qd4_mean_total - 1.0) * 100.0
+    qd4_depth2 = statistics.mean(row.iodepth_level.get("2", 0.0) for row in qd4_rows)
+    qd4_depth4 = statistics.mean(row.iodepth_level.get("4", 0.0) for row in qd4_rows)
+    qd8_depth4 = statistics.mean(row.iodepth_level.get("4", 0.0) for row in qd8_rows)
+    qd8_depth8 = statistics.mean(row.iodepth_level.get("8", 0.0) for row in qd8_rows)
     lines = [
         "# Protocol v6 — 4 KiB Sequential-Read QD4/QD8 Analysis",
         "",
@@ -286,6 +298,13 @@ def make_report(rows: list[Observation]) -> str:
         "## Design and workload",
         "",
         "Five paired blocks compare QD4 and QD8 at 4 KiB sequential reads against the same file-based target. Configured size is 256 MiB; runtime is 10 seconds; direct I/O is enabled; the engine is Windowsaio; and thread=1. The condition order is prespecified and counterbalanced, not randomized.",
+        "",
+        "## Findings at a glance",
+        "",
+        f"QD8 averaged {qd8_mean_iops:.1f} IOPS versus {qd4_mean_iops:.1f} at QD4, a {iops_uplift_pct:.1f}% higher mean; QD8 had higher IOPS in {sum(value < 0 for _, value in paired_differences(rows))}/5 paired blocks. This is a descriptive result for the configured settings on this host.",
+        f"Mean total latency averaged {qd8_mean_total:.1f} µs at QD8 and {qd4_mean_total:.1f} µs at QD4 ({latency_uplift_pct:.1f}% higher at QD8). Latency percentiles do not show a uniform condition winner and are sensitive to the high-tail EXP052 and EXP055 runs.",
+        f"The mean FIO depth-bucket shares were QD4: {qd4_depth4:.1f}% in bucket 4 and {qd4_depth2:.1f}% in bucket 2; QD8: {qd8_depth8:.1f}% in bucket 8 and {qd8_depth4:.1f}% in bucket 4. Therefore, describe this as a comparison of requested iodepth settings; the histogram does not show every I/O being issued at the requested maximum depth.",
+        "All findings are specific to these five pairs, this host, and this file-based workload. The order was counterbalanced but not randomized; no population-level or device-internal causal inference is justified.",
         "",
         "## Scheduled observations",
         "",
@@ -396,13 +415,39 @@ def make_report(rows: list[Observation]) -> str:
     qd4_without_exp055 = [
         row.iops for row in rows if row.condition == "QD4" and row.experiment_id != "EXP055"
     ]
+    qd4_rows_without_exp055 = [
+        row for row in rows if row.condition == "QD4" and row.experiment_id != "EXP055"
+    ]
     first_four_diffs = [value for block, value in diffs if block != 5]
     exp055_iops = next(row.iops for row in rows if row.experiment_id == "EXP055")
+    qd4_latency_without_exp055 = statistics.mean(
+        row.mean_total_latency_us for row in qd4_rows_without_exp055
+    )
+    qd8_latency_all = statistics.mean(
+        row.mean_total_latency_us for row in rows if row.condition == "QD8"
+    )
+    sensitivity_percentiles = {}
+    for field in ("clat_p50_us", "clat_p95_us", "clat_p99_us", "clat_p999_us"):
+        available = [getattr(row, field) for row in qd4_rows_without_exp055
+                     if getattr(row, field) is not None]
+        sensitivity_percentiles[field] = statistics.mean(available) if available else None
+    qd8_percentiles = {}
+    for field in ("clat_p50_us", "clat_p95_us", "clat_p99_us", "clat_p999_us"):
+        available = [getattr(row, field) for row in rows
+                     if row.condition == "QD8" and getattr(row, field) is not None]
+        qd8_percentiles[field] = statistics.mean(available) if available else None
     lines += [
         "",
         "## Sensitivity check: EXP055",
         "",
-        f"EXP055 is retained in every primary result. Its QD4 IOPS is {exp055_iops:.1f}, versus a mean of {statistics.mean(qd4_without_exp055):.1f} IOPS for the other four QD4 runs. As a descriptive sensitivity check only, the QD4 mean is {statistics.mean(qd4_all):.1f} IOPS with all five observations and {statistics.mean(qd4_without_exp055):.1f} without EXP055. The mean paired difference is {diff_summary['mean']:+.1f} IOPS across all five blocks and {statistics.mean(first_four_diffs):+.1f} across Blocks 1–4. This check is not grounds to delete or replace EXP055.",
+        f"EXP055 is retained in every primary result. Its QD4 IOPS is {exp055_iops:.1f}, versus a mean of {statistics.mean(qd4_without_exp055):.1f} IOPS for the other four QD4 runs. As a descriptive sensitivity check only, the QD4 mean is {statistics.mean(qd4_all):.1f} IOPS with all five observations and {statistics.mean(qd4_without_exp055):.1f} without EXP055. The mean paired difference is {diff_summary['mean']:+.1f} IOPS across all five blocks and {statistics.mean(first_four_diffs):+.1f} across Blocks 1–4.",
+        f"EXP055 also has a high latency tail (clat p95/p99/p99.9: {fmt(next(row.clat_p95_us for row in rows if row.experiment_id == 'EXP055'))}/{fmt(next(row.clat_p99_us for row in rows if row.experiment_id == 'EXP055'))}/{fmt(next(row.clat_p999_us for row in rows if row.experiment_id == 'EXP055'))} µs). Mean QD4 total latency is {statistics.mean(row.mean_total_latency_us for row in rows if row.condition == 'QD4'):.1f} µs with EXP055 and {qd4_latency_without_exp055:.1f} µs without it, compared with {qd8_latency_all:.1f} µs for QD8.",
+        "Mean per-run clat percentiles with EXP055 removed from the QD4 sensitivity calculation (not the primary analysis) are "
+        f"p50={fmt(sensitivity_percentiles['clat_p50_us'])}, p95={fmt(sensitivity_percentiles['clat_p95_us'])}, "
+        f"p99={fmt(sensitivity_percentiles['clat_p99_us'])}, p99.9={fmt(sensitivity_percentiles['clat_p999_us'])} µs; "
+        f"the corresponding all-five-run QD8 means are p50={fmt(qd8_percentiles['clat_p50_us'])}, "
+        f"p95={fmt(qd8_percentiles['clat_p95_us'])}, p99={fmt(qd8_percentiles['clat_p99_us'])}, "
+        f"p99.9={fmt(qd8_percentiles['clat_p999_us'])} µs. This check shows how tail-latency rankings depend on EXP055; it is not grounds to delete or replace that observation.",
         "",
         "## Interpretation and limitations",
         "",

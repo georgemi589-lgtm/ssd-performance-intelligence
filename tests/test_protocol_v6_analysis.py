@@ -4,6 +4,7 @@ from __future__ import annotations
 from experiments.analyze_protocol_v6 import (
     SCHEDULE,
     Observation,
+    make_report,
     paired_differences,
     summarize,
 )
@@ -79,3 +80,29 @@ def test_schedule_contains_ten_prespecified_runs_in_five_pairs() -> None:
     assert SCHEDULE[48] == ("QD4", 1, 1, 2)
     assert SCHEDULE[55] == ("QD4", 5, 5, 1)
     assert SCHEDULE[56] == ("QD8", 5, 5, 2)
+
+
+def test_report_highlights_findings_depth_histogram_and_latency_sensitivity() -> None:
+    rows = []
+    for block, qd4, qd8 in (
+        (1, 90.0, 100.0),
+        (2, 110.0, 120.0),
+        (3, 95.0, 105.0),
+        (4, 80.0, 115.0),
+        (5, 50.0, 125.0),
+    ):
+        qd4_id, qd8_id = {
+            1: ("EXP048", "EXP047"),
+            2: ("EXP049", "EXP050"),
+            3: ("EXP051", "EXP052"),
+            4: ("EXP054", "EXP053"),
+            5: ("EXP055", "EXP056"),
+        }[block]
+        rows.append(make_observation(qd4_id, "QD4", block, qd4))
+        rows.append(make_observation(qd8_id, "QD8", block, qd8))
+
+    report = make_report(rows)
+    assert "Findings at a glance" in report
+    assert "requested iodepth settings" in report
+    assert "Sensitivity check: EXP055" in report
+    assert "high latency tail" in report
